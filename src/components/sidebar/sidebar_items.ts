@@ -40,21 +40,26 @@ export interface SidebarItem {
     /** Shown when this firmware feature is enabled. */
     feature?: string;
     hideInSidebar?: boolean;
+    /** DronoBox fork: still listed while the workshop lock is on. */
+    workshop?: boolean;
 }
 
 export interface SidebarVisibilityContext {
     expertMode: boolean;
+    /** DronoBox fork: participants only see the entries marked `workshop`. */
+    workshopLocked?: boolean;
     config?: BuildOptionsConfig | null;
     features?: { isEnabled?: (featureName: string) => boolean } | null;
 }
 
 export const sidebarItems: SidebarItem[] = [
-    { key: "landing", mode: "disconnected", i18n: "tabLanding", icon: "i-lucide-home" },
+    { key: "landing", mode: "disconnected", i18n: "tabLanding", icon: "i-lucide-home", workshop: true },
     { key: "firmware_flasher", mode: "disconnected", i18n: "tabFirmwareFlasher", icon: "i-lucide-zap" },
     { key: "help", mode: "disconnected", i18n: "tabHelp", icon: "i-lucide-help-circle" },
     { key: "preflight", mode: "disconnected", i18n: "tabPreflight", icon: "i-lucide-clipboard-check" },
     { key: "flight_plan", mode: "disconnected", i18n: "tabFlightPlan", icon: "i-lucide-route", expert: true },
 
+    { key: "dronobox", mode: "connected", i18n: "dronobox:tabName", icon: "i-lucide-graduation-cap", workshop: true },
     { key: "setup", mode: "connected", i18n: "tabSetup", icon: "i-lucide-sliders-horizontal" },
     { key: "sensors", mode: "connected", i18n: "tabSensorConfig", icon: "i-lucide-cpu" },
     { key: "ports", mode: "connected", i18n: "tabPorts", icon: "i-lucide-cable" },
@@ -100,6 +105,9 @@ export const sidebarItems: SidebarItem[] = [
 ];
 
 export function isItemVisible(item: SidebarItem, ctx: SidebarVisibilityContext): boolean {
+    if (ctx.workshopLocked && !item.workshop) {
+        return false;
+    }
     if (item.expert && !ctx.expertMode) {
         return false;
     }

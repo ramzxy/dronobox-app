@@ -28,6 +28,7 @@ import { mountVueTab, vueTabState } from "./vue_tab_mounter";
 import { sidebarItems } from "../components/sidebar/sidebar_items";
 import { useConnectionStore } from "../stores/connection";
 import { useNavigationStore } from "../stores/navigation";
+import { useDronoBoxStore } from "../stores/dronobox";
 
 export interface SwitchTabOptions {
     /**
@@ -160,6 +161,10 @@ export function switchTab(tabKey: string, options: SwitchTabOptions = {}): boole
 
 /** Opens the remembered last tab after connecting, when that option is on and the tab is allowed, else Setup. */
 export function selectDefaultTabWhenConnected(): void {
+    // DronoBox fork: participants always land in the guided flow, also after a save-and-reboot.
+    if (useDronoBoxStore().workshopLocked && switchTab("dronobox", { mode: "connected" })) {
+        return;
+    }
     const result = getConfig(["rememberLastTab", "lastTab"]);
     const lastTab = typeof result.lastTab === "string" ? result.lastTab.substring(4) : "";
     const tabKey =

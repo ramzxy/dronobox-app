@@ -11,7 +11,11 @@
         class="flex flex-row gap-1 border-t border-default pt-2 mt-auto items-center flex-wrap"
         :class="{ 'sidebar-footer--compact': isCompact }"
     >
-        <UTooltip :text="`${t('settingsSearchTitle')} (Ctrl/Cmd + K)`" :delay-duration="300">
+        <UTooltip
+            v-if="!dronobox.workshopLocked"
+            :text="`${t('settingsSearchTitle')} (Ctrl/Cmd + K)`"
+            :delay-duration="300"
+        >
             <UButton
                 icon="i-lucide-search"
                 variant="ghost"
@@ -23,7 +27,11 @@
                 :class="{ 'mr-auto': !isCompact }"
             />
         </UTooltip>
-        <UTooltip :text="$t('sidebarSettingsMenu')" :delay-duration="300">
+        <UTooltip
+            :text="$t('sidebarSettingsMenu')"
+            :delay-duration="300"
+            :class="{ 'ml-auto': dronobox.workshopLocked && !isCompact }"
+        >
             <UDropdownMenu
                 :items="settingsMenuItems"
                 :content="{ side: 'top', align: isCompact ? 'start' : 'end' }"
@@ -39,10 +47,11 @@
                 />
             </UDropdownMenu>
         </UTooltip>
-        <UserSession :is-compact="isCompact" />
+        <UserSession v-if="!dronobox.workshopLocked" :is-compact="isCompact" />
     </div>
     <SettingsSearch v-model="settingsSearchOpen" :expert-mode="expertModeOn" @select="onSettingSelected" />
     <OptionsDialog v-model="optionsOpen" />
+    <InstructorDialog v-model:open="instructorOpen" />
 </template>
 
 <script setup lang="ts">
@@ -62,12 +71,20 @@ import { isExpertModeEnabled } from "@/js/utils/isExpertModeEnabled";
 import { EventBus } from "@/components/eventBus";
 import OptionsDialog from "@/components/dialogs/OptionsDialog.vue";
 import SettingsSearch from "@/components/settings-search/SettingsSearch.vue";
+import InstructorDialog from "@/components/dronobox/InstructorDialog.vue";
+import { useDronoBoxStore } from "@/stores/dronobox";
 import type { SettingsSearchEntry } from "virtual:settings-search-index";
 
 const { t } = useTranslation();
 const settingsSearchOpen = ref(false);
+const dronobox = useDronoBoxStore();
+const instructorOpen = ref(false);
 
 function onSettingsSearchShortcut(event: KeyboardEvent) {
+    // Search jumps straight into any tab, which would bypass the workshop lock.
+    if (dronobox.workshopLocked) {
+        return;
+    }
     if ((event.ctrlKey || event.metaKey) && !event.altKey && event.code === "KeyK") {
         event.preventDefault();
         settingsSearchOpen.value = true;
@@ -111,7 +128,43 @@ watch(
     },
 );
 
-const settingsMenuItems = computed<DropdownMenuItem[][]>(() => [
+const darkModeItem = computed<DropdownMenuItem>(() => ({
+    label: t("sidebarToggleDarkMode"),
+    icon: isDark.value ? "i-lucide-sun" : "i-lucide-moon",
+    onSelect: (event: Event) => {
+        event.preventDefault();
+        toggleDarkMode();
+    },
+}));
+
+const instructorItem = computed<DropdownMenuItem>(() =>
+    dronobox.workshopLocked
+        ? {
+              label: t("dronobox:instructorMenu"),
+              icon: "i-lucide-graduation-cap",
+              onSelect: () => (instructorOpen.value = true),
+          }
+        : { label: t("dronobox:instructorLock"), icon: "i-lucide-lock", onSelect: () => dronobox.lock() },
+);
+
+const settingsMenuItems = computed<DropdownMenuItem[][]>(() =>
+    dronobox.workshopLocked
+        ? [
+              [
+                  {
+                      label: t("tabOptions"),
+                      icon: "i-lucide-sliders-horizontal",
+                      onSelect: () => (optionsOpen.value = true),
+                  },
+                  darkModeItem.value,
+              ],
+              [instructorItem.value],
+          ]
+        : fullSettingsMenuItems.value,
+);
+
+const fullSettingsMenuItems = computed<DropdownMenuItem[][]>(() => [
+    [instructorItem.value],
     [
         { label: t("tabOptions"), icon: "i-lucide-sliders-horizontal", onSelect: () => (optionsOpen.value = true) },
         {

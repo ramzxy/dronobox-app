@@ -184,7 +184,9 @@ const i18n: I18n = {
                     // pt/pt-BR pairing is handled by `fallbackLng` below.
                     load: "currentOnly",
                     debug: true,
-                    ns: ["messages"],
+                    // DronoBox fork: its strings live in their own namespace so Crowdin syncs of
+                    // messages.json never conflict with them.
+                    ns: ["messages", "dronobox"],
                     defaultNS: ["messages"],
                     fallbackLng: languageFallback,
                     backend: {

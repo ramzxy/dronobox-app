@@ -1,6 +1,7 @@
 <template>
     <BaseTab tab-name="landing">
-        <div class="content_wrapper">
+        <DronoBoxWelcome v-if="dronobox.workshopLocked" />
+        <div v-else class="content_wrapper">
             <div class="content_top">
                 <div class="logowrapper">
                     <img src="/images/bf_logo_white.svg" alt="" />
@@ -102,15 +103,19 @@
 import { defineComponent, ref } from "vue";
 import BaseTab from "./BaseTab.vue";
 import SponsorTile from "../sponsor/SponsorTile.vue";
+import DronoBoxWelcome from "../dronobox/DronoBoxWelcome.vue";
 import { i18n } from "../../js/localization";
+import { useDronoBoxStore } from "../../stores/dronobox";
 
 export default defineComponent({
     name: "LandingTab",
     components: {
         BaseTab,
         SponsorTile,
+        DronoBoxWelcome,
     },
     setup() {
+        const dronobox = useDronoBoxStore();
         const availableLanguages = ref(["DEFAULT", ...i18n.getLanguagesAvailables()]);
         const selectedLanguage = ref(i18n.selectedLanguage);
 
@@ -122,6 +127,7 @@ export default defineComponent({
         }
 
         return {
+            dronobox,
             availableLanguages,
             selectedLanguage,
             changeLanguage,

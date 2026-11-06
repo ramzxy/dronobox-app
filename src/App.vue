@@ -9,12 +9,12 @@
             <UserSession is-compact class="floating-account" />
             <div id="tab-content-container" :class="{ 'has-mobile-topbar': isLandingTab }">
                 <div class="tab_container" :class="{ reveal: isMobileSidebarOpen }">
-                    <betaflight-logo
+                    <DronoBoxLogo
                         :configurator-version="appInfo.displayVersion"
                         :firmware-version="fcStore.config.flightControllerVersion"
                         :firmware-id="fcStore.config.flightControllerIdentifier"
                         :hardware-id="fcStore.config.hardwareName"
-                    ></betaflight-logo>
+                    />
                     <Teleport to=".floating-connect" :disabled="!useFloatingChrome">
                         <ConnectButton />
                     </Teleport>
@@ -63,6 +63,7 @@ import ConnectButton from "./components/device-picker/ConnectButton.vue";
 import GlobalDialogs from "./components/dialogs/GlobalDialogs.vue";
 import LogPanel from "./components/log/LogPanel.vue";
 import Sidebar from "./components/sidebar/Sidebar.vue";
+import DronoBoxLogo from "./components/dronobox/DronoBoxLogo.vue";
 import PortUsageModule from "./js/port_usage";
 import { i18n } from "./js/localization";
 import { useUiLocale } from "./composables/useUiLocale";

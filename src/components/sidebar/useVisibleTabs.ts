@@ -26,6 +26,7 @@ import { useAuthStore } from "@/stores/auth";
 import { useFlightControllerStore } from "@/stores/fc";
 import type { BetaflightModel } from "../init";
 import { useNavigationStore } from "@/stores/navigation";
+import { useDronoBoxStore } from "@/stores/dronobox";
 
 type SidebarItem = (typeof sidebarItems)[number];
 
@@ -43,6 +44,7 @@ export function useVisibleTabs(): ComputedRef<SidebarItem[]> {
     const navigationStore = useNavigationStore();
     const authStore = useAuthStore();
     const fcStore = useFlightControllerStore();
+    const dronoboxStore = useDronoBoxStore();
     const betaflightModel = inject<Partial<BetaflightModel> | null>("betaflightModel", null);
 
     const isModeVisible = (mode: string) => {
@@ -65,6 +67,7 @@ export function useVisibleTabs(): ComputedRef<SidebarItem[]> {
         const model = betaflightModel ?? globalThis.vm;
         return {
             expertMode: Boolean(model?.expertMode),
+            workshopLocked: dronoboxStore.workshopLocked,
             config: fcStore.config,
             features: fcStore.features?.features,
         };

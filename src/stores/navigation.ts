@@ -37,6 +37,7 @@ export const DEFAULT_ALLOWED_TABS_WHEN_DISCONNECTED: readonly string[] = [
 
 /** Tabs every connected flight controller gets. */
 export const DEFAULT_ALLOWED_TABS: readonly string[] = [
+    "dronobox",
     "setup",
     "failsafe",
     "power",

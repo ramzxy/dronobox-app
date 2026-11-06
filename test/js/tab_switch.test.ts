@@ -41,6 +41,7 @@ vi.mock("../../src/js/localization", () => ({ i18n: { getMessage: (key: string) 
 import { selectDefaultTabWhenConnected } from "../../src/js/tab_switch";
 import { DEFAULT_ALLOWED_TABS, useNavigationStore } from "../../src/stores/navigation";
 import { useConnectionStore } from "../../src/stores/connection";
+import { useDronoBoxStore } from "../../src/stores/dronobox";
 
 function openedTab() {
     return mountVueTab.mock.calls.at(-1)?.[0];
@@ -55,6 +56,17 @@ describe("selectDefaultTabWhenConnected", () => {
         config.rememberLastTab = true;
         config.lastTab = undefined;
         mountVueTab.mockClear();
+        // Upstream behaviour is what an unlocked instructor gets in the DronoBox fork.
+        useDronoBoxStore().instructorUnlocked = true;
+    });
+
+    it("opens the DronoBox tab while the workshop lock is on, whatever was remembered", () => {
+        useDronoBoxStore().instructorUnlocked = false;
+        config.lastTab = "tab_pid_tuning";
+
+        selectDefaultTabWhenConnected();
+
+        expect(openedTab()).toBe("dronobox");
     });
 
     it("reopens the remembered tab when it is allowed", () => {

@@ -49,6 +49,7 @@ import { useDialogStore } from "../stores/dialog";
 import { MspCancelledError } from "./msp/mspErrors";
 import { isDeleteAccountPath, requestDeleteAccountFocus } from "./utils/deleteAccountLink";
 import { useAppInfoStore } from "../stores/appInfo";
+import { applyDronoBoxDefaults } from "../dronobox/init";
 
 window.addEventListener("unhandledrejection", (event) => {
     if (event.reason instanceof MspCancelledError) {
@@ -156,6 +157,8 @@ function showNetworkOnlyNotice(next: () => void): void {
 }
 
 function appReady() {
+    applyDronoBoxDefaults();
+
     if (import.meta.env.DEV) {
         void loadMspDebugTools();
     }

@@ -1,0 +1,479 @@
+{
+    "tabName": {
+        "message": "DronoBox"
+    },
+    "title": {
+        "message": "Stel je drone in"
+    },
+    "subtitle": {
+        "message": "Zeven korte stappen van een doos onderdelen naar een drone die klaar is om te vliegen."
+    },
+    "stepsLabel": {
+        "message": "Stappen"
+    },
+    "loadFailed": {
+        "message": "De flight controller kon niet worden uitgelezen. Haal de USB-kabel eruit, steek hem terug en verbind opnieuw."
+    },
+    "next": {
+        "message": "Volgende"
+    },
+    "whyTitle": {
+        "message": "Waarom?"
+    },
+    "stepGyro": {
+        "message": "Wakker maken"
+    },
+    "stepAlign": {
+        "message": "Waar is voor?"
+    },
+    "stepLevel": {
+        "message": "Waterpas"
+    },
+    "stepSafety": {
+        "message": "Veiligheid"
+    },
+    "stepMotors": {
+        "message": "Motortest"
+    },
+    "stepRadio": {
+        "message": "Zender"
+    },
+    "stepDone": {
+        "message": "Klaar"
+    },
+    "gyroTitle": {
+        "message": "Is daar iemand?"
+    },
+    "gyroLead": {
+        "message": "De flight controller is het brein van de drone. Daarop zit een piepklein chipje, de gyroscoop, dat elke draaiing voelt."
+    },
+    "gyroTask": {
+        "message": "Pak je drone op en kantel hem langzaam alle kanten op. De drone rechts doet je na en de balk loopt vol."
+    },
+    "gyroWhy": {
+        "message": "Een drone kan niet uit zichzelf in balans blijven. Duizenden keren per seconde leest de flight controller de gyroscoop uit, merkt dat hij begint te kantelen en past de motorsnelheden aan. Zo snel is geen enkele piloot."
+    },
+    "gyroHelp": {
+        "message": "Beweegt er niets op het scherm? Controleer of de USB-kabel goed vastzit en vraag dan iemand van DroneTeam."
+    },
+    "gyroWaiting": {
+        "message": "Blijf kantelen…"
+    },
+    "gyroConfirm": {
+        "message": "Hij doet me na"
+    },
+    "alignTitle": {
+        "message": "Waar is voor?"
+    },
+    "alignLead": {
+        "message": "De flight controller weet niet hoe hij gemonteerd is. In de DronoBox zit hij 270° met de klok mee gedraaid, dus dat moeten we hem vertellen."
+    },
+    "alignLook": {
+        "message": "Zoek het witte pijltje op de flight controller en de pijl op de bodem van de body. Die moeten dezelfde kant op wijzen."
+    },
+    "alignCurrent": {
+        "message": "Nu"
+    },
+    "alignNeeded": {
+        "message": "DronoBox heeft nodig"
+    },
+    "alignDefault": {
+        "message": "Standaard"
+    },
+    "alignApply": {
+        "message": "Zet op CW 270° en sla op"
+    },
+    "alignOk": {
+        "message": "De flight controller weet nu hoe hij gemonteerd is."
+    },
+    "alignCheck": {
+        "message": "Kantel de neus van je drone naar beneden. De drone op het scherm moet ook zijn neus laten zakken, niet opzij kantelen."
+    },
+    "alignConfirm": {
+        "message": "Neus omlaag is neus omlaag"
+    },
+    "alignUnknown": {
+        "message": "Met deze firmware kunnen we de instelling hier niet uitlezen. Vraag iemand van DroneTeam om het te controleren."
+    },
+    "alignFailed": {
+        "message": "De flight controller heeft de wijziging niet geaccepteerd. Vraag iemand van DroneTeam."
+    },
+    "alignWhy": {
+        "message": "Als het bord denkt dat voor links is, vliegt de drone opzij als je de stick naar voren duwt. Bij opslaan start het bord opnieuw op; deze pagina komt vanzelf terug."
+    },
+    "levelTitle": {
+        "message": "Hoe ziet plat eruit?"
+    },
+    "levelLead": {
+        "message": "De versnellingsmeter voelt de zwaartekracht en weet dus waar beneden is. Nu laten we hem zien hoe plat eruitziet."
+    },
+    "levelTask": {
+        "message": "Zet de drone op een vlakke tafel en druk op de knop. Niet aanraken tot hij klaar is."
+    },
+    "levelButton": {
+        "message": "Versnellingsmeter kalibreren"
+    },
+    "levelBusy": {
+        "message": "Bezig, niet aanraken…"
+    },
+    "levelDone": {
+        "message": "Klaar. Je drone weet nu wat plat is."
+    },
+    "levelWhy": {
+        "message": "In angle mode, de beginnersstand, gaat de drone vanzelf weer recht hangen als je de sticks loslaat. Dat kan alleen als hij weet wat waterpas is."
+    },
+    "safetyTitle": {
+        "message": "Veiligheidscheck"
+    },
+    "safetyLead": {
+        "message": "Zo gaan de motoren draaien. Een draaiende propeller kan je vingers snijden, dus de propellers blijven de hele test los."
+    },
+    "safetyPropsOff": {
+        "message": "Alle vier de propellers zijn eraf. Ik heb het nog een keer gecontroleerd."
+    },
+    "safetyWatcher": {
+        "message": "Iemand van DroneTeam kijkt mee"
+    },
+    "safetyBattery": {
+        "message": "Sluit nu de accu aan. Laat de USB-kabel erin zitten."
+    },
+    "safetyBatteryOk": {
+        "message": "Accu gevonden: {{volts}} V"
+    },
+    "safetyBatteryWaiting": {
+        "message": "Wachten op de accu…"
+    },
+    "safetyContinue": {
+        "message": "Start de motortest"
+    },
+    "motorsTitle": {
+        "message": "Motortest"
+    },
+    "motorsLead": {
+        "message": "Twee motoren moeten met de klok mee draaien en twee tegen de klok in. Test ze een voor een en vertel welke kant elke motor op draait."
+    },
+    "motorsEnable": {
+        "message": "Motortest aan"
+    },
+    "motorsEnableHelp": {
+        "message": "Een willekeurige toets op het toetsenbord stopt alle motoren."
+    },
+    "motorsNoBattery": {
+        "message": "Sluit eerst de accu aan. De motoren krijgen hun stroom daaruit, niet via USB."
+    },
+    "motorsMapLabel": {
+        "message": "Bovenaanzicht van de drone"
+    },
+    "motorsFront": {
+        "message": "Voor"
+    },
+    "motorsPickMotor": {
+        "message": "Motor {{n}}"
+    },
+    "motorsPick": {
+        "message": "Klik op een motor in de tekening om te beginnen."
+    },
+    "motorsSelected": {
+        "message": "Motor {{n}}, {{position}}"
+    },
+    "motorsHold": {
+        "message": "Ingedrukt houden: motor {{n}}"
+    },
+    "motorsSpinFirst": {
+        "message": "Laat hem eerst draaien en geef dan antwoord."
+    },
+    "motorsQuestion": {
+        "message": "Van bovenaf gezien: welke kant draaide motor {{n}} op?"
+    },
+    "motorsCw": {
+        "message": "Met de klok mee"
+    },
+    "motorsCcw": {
+        "message": "Tegen de klok in"
+    },
+    "motorsCwShort": {
+        "message": "MK"
+    },
+    "motorsCcwShort": {
+        "message": "TK"
+    },
+    "motorsCorrect": {
+        "message": "Motor {{n}} draait de goede kant op."
+    },
+    "motorsWrong": {
+        "message": "Motor {{n}} draait de verkeerde kant op. Haal de accu eruit, wissel twee van de drie draden tussen deze motor en zijn ESC om, sluit de accu weer aan en test opnieuw."
+    },
+    "motorsRetry": {
+        "message": "Test deze motor opnieuw"
+    },
+    "motorsProgress": {
+        "message": "{{done}} van {{total}} motoren goed"
+    },
+    "motorsDone": {
+        "message": "Alle motoren draaien goed"
+    },
+    "motorsWhy": {
+        "message": "Een draaiende propeller duwt de drone de andere kant op, net als wanneer je ronddraait op een bureaustoel. Twee met de klok mee en twee tegen de klok in heffen elkaar op. Om te draaien versnelt de drone het ene paar en vertraagt hij het andere."
+    },
+    "posFrontLeft": {
+        "message": "linksvoor"
+    },
+    "posFrontRight": {
+        "message": "rechtsvoor"
+    },
+    "posBackLeft": {
+        "message": "linksachter"
+    },
+    "posBackRight": {
+        "message": "rechtsachter"
+    },
+    "radioTitle": {
+        "message": "Praat ertegen"
+    },
+    "radioLead": {
+        "message": "Zet je zender aan. Elke stickbeweging gaat door de lucht naar de ontvanger in de drone."
+    },
+    "radioNoSignal": {
+        "message": "Geen signaal van de zender. Staat hij aan? Zo ja, vraag iemand van DroneTeam om hem aan je ontvanger te koppelen."
+    },
+    "radioThrottle": {
+        "message": "Gas"
+    },
+    "radioThrottleHelp": {
+        "message": "Linkerstick omhoog en omlaag: stijgen en dalen"
+    },
+    "radioYaw": {
+        "message": "Yaw"
+    },
+    "radioYawHelp": {
+        "message": "Linkerstick links en rechts: om je as draaien"
+    },
+    "radioPitch": {
+        "message": "Pitch"
+    },
+    "radioPitchHelp": {
+        "message": "Rechterstick omhoog en omlaag: neus omlaag of omhoog"
+    },
+    "radioRoll": {
+        "message": "Roll"
+    },
+    "radioRollHelp": {
+        "message": "Rechterstick links en rechts: opzij kantelen"
+    },
+    "radioAux1": {
+        "message": "AUX 1"
+    },
+    "radioAuxHelp": {
+        "message": "Een schakelaar, vaak om de motoren te activeren"
+    },
+    "radioTaskThrottleUp": {
+        "message": "Duw de linkerstick helemaal omhoog"
+    },
+    "radioTaskThrottleDown": {
+        "message": "…en helemaal terug omlaag"
+    },
+    "radioTaskYawLeft": {
+        "message": "Duw de linkerstick naar links"
+    },
+    "radioTaskPitchForward": {
+        "message": "Duw de rechterstick naar voren"
+    },
+    "radioTaskRollRight": {
+        "message": "Duw de rechterstick naar rechts"
+    },
+    "radioWhy": {
+        "message": "De ontvanger maakt van elke stick een getal tussen 1000 en 2000. Het midden is 1500. De flight controller mengt die vier getallen tot een snelheid voor elke motor."
+    },
+    "doneTitle": {
+        "message": "Klaar om op te stijgen"
+    },
+    "doneLead": {
+        "message": "Je drone is ingesteld. Iemand van DroneTeam helpt je met de eerste vlucht."
+    },
+    "doneProps": {
+        "message": "Propellers erop, en elke propeller past bij de draairichting van zijn motor"
+    },
+    "doneSticks": {
+        "message": "Gas helemaal omlaag voordat je activeert"
+    },
+    "doneHover": {
+        "message": "Eerst laag zweven, dan pas hoger"
+    },
+    "doneArming": {
+        "message": "Het vak rechts laat zien wat de drone nog tegenhoudt. \"Verbonden met de laptop\" is normaal: een drone activeert nooit zolang de USB-kabel erin zit."
+    },
+    "doneDisconnect": {
+        "message": "Druk op Verbreek verbinding, haal de accu eruit en daarna de USB-kabel."
+    },
+    "liveTitle": {
+        "message": "Live van je drone"
+    },
+    "liveRoll": {
+        "message": "Roll"
+    },
+    "livePitch": {
+        "message": "Pitch"
+    },
+    "liveBattery": {
+        "message": "Accu"
+    },
+    "liveUsbOnly": {
+        "message": "Alleen USB"
+    },
+    "armingTitle": {
+        "message": "Wat houdt hem tegen"
+    },
+    "armingNone": {
+        "message": "Niets houdt de drone tegen."
+    },
+    "armingNO_GYRO": {
+        "message": "Geen gyroscoop gevonden. Vraag iemand van DroneTeam."
+    },
+    "armingFAILSAFE": {
+        "message": "Failsafe: de drone is het zendersignaal kwijt en staat in noodstand."
+    },
+    "armingRXLOSS": {
+        "message": "Geen zendersignaal. Staat de zender aan en is hij gekoppeld?"
+    },
+    "armingTHROTTLE": {
+        "message": "De gasstick staat niet helemaal omlaag."
+    },
+    "armingANGLE": {
+        "message": "De drone staat te scheef. Zet hem plat neer."
+    },
+    "armingBOOT_GRACE_TIME": {
+        "message": "Hij is net opgestart. Wacht een paar seconden."
+    },
+    "armingNOPREARM": {
+        "message": "Zet eerst de pre-arm-schakelaar om."
+    },
+    "armingCALIBRATING": {
+        "message": "De sensoren kalibreren. Hou de drone stil."
+    },
+    "armingCLI": {
+        "message": "De opdrachtregel staat open."
+    },
+    "armingMSP": {
+        "message": "Verbonden met de laptop. Een drone activeert nooit zolang de USB-kabel erin zit."
+    },
+    "armingACC_CALIBRATION": {
+        "message": "De versnellingsmeter moet nog gekalibreerd worden (stap 3)."
+    },
+    "armingMOTOR_PROTOCOL": {
+        "message": "Er is geen motorprotocol ingesteld. Vraag iemand van DroneTeam."
+    },
+    "armingREBOOT_REQUIRED": {
+        "message": "Een instelling vraagt om een herstart. Haal de stekker eruit en steek hem terug."
+    },
+    "armingARM_SWITCH": {
+        "message": "De arm-schakelaar staat aan. Zet hem uit; hij moet uit staan voordat je kunt activeren."
+    },
+    "armingLOAD": {
+        "message": "De processor heeft het te druk."
+    },
+    "instructorMenu": {
+        "message": "Instructeursmodus"
+    },
+    "instructorTitle": {
+        "message": "Instructeursmodus"
+    },
+    "instructorText": {
+        "message": "Toont de volledige Betaflight-interface op deze laptop totdat je hem weer vergrendelt of de browser sluit."
+    },
+    "instructorPin": {
+        "message": "Pincode"
+    },
+    "instructorWrong": {
+        "message": "Verkeerde pincode"
+    },
+    "instructorUnlock": {
+        "message": "Ontgrendelen"
+    },
+    "instructorLock": {
+        "message": "Terug naar workshopmodus"
+    },
+    "instructorBadge": {
+        "message": "Instructeursmodus"
+    },
+    "instructorTools": {
+        "message": "Instructeur"
+    },
+    "instructorResetProgress": {
+        "message": "Voortgang van deze groep wissen"
+    },
+    "instructorBaseline": {
+        "message": "Kit terugzetten naar DronoBox-basis"
+    },
+    "instructorBaselineMissing": {
+        "message": "Nog geen basisconfiguratie. Plak de diff van een werkende kit in baselineCli in src/dronobox/kit.ts. Vereist firmware 4.5.4 of nieuwer."
+    },
+    "instructorBaselineOk": {
+        "message": "Basisconfiguratie toegepast. Het bord start opnieuw op."
+    },
+    "instructorBaselineFailed": {
+        "message": "Basisconfiguratie niet toegepast:"
+    },
+    "logoByline": {
+        "message": "DroneTeam Twente"
+    },
+    "logoBasedOn": {
+        "message": "Gebaseerd op Betaflight App"
+    },
+    "welcomeLanguage": {
+        "message": "Taal"
+    },
+    "welcomeEyebrow": {
+        "message": "DroneTeam Twente workshop"
+    },
+    "welcomeTitle": {
+        "message": "Tijd om je drone wakker te maken"
+    },
+    "welcomeLead": {
+        "message": "Je hebt hem gebouwd. Nu leer je hem vliegen. Dit duurt ongeveer een kwartier."
+    },
+    "welcomeStep1": {
+        "message": "Sluit de drone aan op deze laptop"
+    },
+    "welcomeStep1Help": {
+        "message": "Gebruik de micro-USB-kabel. De accu blijft er voorlopig uit."
+    },
+    "welcomeStep2": {
+        "message": "Druk op Verbind"
+    },
+    "welcomeStep2Help": {
+        "message": "Dat is de groene knop in het menu. Je browser vraagt welk apparaat je wilt gebruiken: kies degene met STM32 of Betaflight in de naam."
+    },
+    "welcomeStep3": {
+        "message": "Volg de stappen"
+    },
+    "welcomeStep3Help": {
+        "message": "De app neemt je een voor een mee door de controles."
+    },
+    "welcomeTroubleTitle": {
+        "message": "Je drone verschijnt niet?"
+    },
+    "welcomeTrouble1": {
+        "message": "Probeer een andere USB-kabel. Veel kabels kunnen alleen opladen en geen data doorgeven."
+    },
+    "welcomeTrouble2": {
+        "message": "Probeer een andere USB-poort van de laptop."
+    },
+    "welcomeTrouble3": {
+        "message": "Gebruik Chrome of Edge. Safari en Firefox kunnen niet met USB-apparaten praten."
+    },
+    "welcomeTrouble4": {
+        "message": "Nog steeds niets? Vraag iemand van DroneTeam."
+    },
+    "welcomeFooter": {
+        "message": "Gemaakt door DroneTeam Twente met Betaflight, open-source software voor flight controllers (GPL-3.0)."
+    },
+    "welcomeSource": {
+        "message": "Broncode"
+    },
+    "skipStep": {
+        "message": "Stap overslaan"
+    },
+    "welcomeResume": {
+        "message": "Welkom terug! Druk op Verbind om verder te gaan bij stap {{n}} ({{step}})."
+    }
+}
