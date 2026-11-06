@@ -12,7 +12,15 @@ import ui from "@nuxt/ui/vite";
 import settingsSearchIndexPlugin from "./scripts/vite-plugin-settings-search.mjs";
 import nuxtUiViteOptions from "./nuxt-ui.vite.js";
 
-const commitHash = child.execSync("git rev-parse --short HEAD").toString().trim();
+// DronoBox fork: Vercel builds have no .git directory, so fall back to the commit it reports.
+function readCommitHash() {
+    try {
+        return child.execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim();
+    } catch {
+        return (process.env.VERCEL_GIT_COMMIT_SHA ?? "unknown").slice(0, 7);
+    }
+}
+const commitHash = readCommitHash();
 
 const devHostname = process.env.BF_DEV_HOSTNAME || "local.betaflight.com";
 
