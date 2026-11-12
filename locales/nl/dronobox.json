@@ -21,10 +21,10 @@
         "message": "Waarom?"
     },
     "stepGyro": {
-        "message": "Wakker maken"
+        "message": "Gyroscoop"
     },
     "stepAlign": {
-        "message": "Waar is voor?"
+        "message": "Richting"
     },
     "stepLevel": {
         "message": "Waterpas"
@@ -33,7 +33,7 @@
         "message": "Veiligheid"
     },
     "stepMotors": {
-        "message": "Motortest"
+        "message": "Motoren"
     },
     "stepRadio": {
         "message": "Zender"
@@ -42,13 +42,13 @@
         "message": "Klaar"
     },
     "gyroTitle": {
-        "message": "Is daar iemand?"
+        "message": "De gyroscoop"
     },
     "gyroLead": {
         "message": "De flight controller is het brein van de drone. Daarop zit een piepklein chipje, de gyroscoop, dat elke draaiing voelt."
     },
     "gyroTask": {
-        "message": "Pak je drone op en kantel hem langzaam alle kanten op. De drone rechts doet je na en de balk loopt vol."
+        "message": "Pak je drone op en kantel hem langzaam alle kanten op. De drone op het scherm doet je na en de balken lopen vol."
     },
     "gyroWhy": {
         "message": "Een drone kan niet uit zichzelf in balans blijven. Duizenden keren per seconde leest de flight controller de gyroscoop uit, merkt dat hij begint te kantelen en past de motorsnelheden aan. Zo snel is geen enkele piloot."
@@ -63,7 +63,7 @@
         "message": "Hij doet me na"
     },
     "alignTitle": {
-        "message": "Waar is voor?"
+        "message": "Vertel hem waar voor is"
     },
     "alignLead": {
         "message": "De flight controller weet niet hoe hij gemonteerd is. In de DronoBox zit hij 270° met de klok mee gedraaid, dus dat moeten we hem vertellen."
@@ -102,7 +102,7 @@
         "message": "Als het bord denkt dat voor links is, vliegt de drone opzij als je de stick naar voren duwt. Bij opslaan start het bord opnieuw op; deze pagina komt vanzelf terug."
     },
     "levelTitle": {
-        "message": "Hoe ziet plat eruit?"
+        "message": "Kalibreer de versnellingsmeter"
     },
     "levelLead": {
         "message": "De versnellingsmeter voelt de zwaartekracht en weet dus waar beneden is. Nu laten we hem zien hoe plat eruitziet."
@@ -123,7 +123,7 @@
         "message": "In angle mode, de beginnersstand, gaat de drone vanzelf weer recht hangen als je de sticks loslaat. Dat kan alleen als hij weet wat waterpas is."
     },
     "safetyTitle": {
-        "message": "Veiligheidscheck"
+        "message": "Voordat de motoren draaien"
     },
     "safetyLead": {
         "message": "Zo gaan de motoren draaien. Een draaiende propeller kan je vingers snijden, dus de propellers blijven de hele test los."
@@ -228,7 +228,7 @@
         "message": "rechtsachter"
     },
     "radioTitle": {
-        "message": "Praat ertegen"
+        "message": "Zendercheck"
     },
     "radioLead": {
         "message": "Zet je zender aan. Elke stickbeweging gaat door de lucht naar de ontvanger in de drone."
@@ -285,7 +285,7 @@
         "message": "De ontvanger maakt van elke stick een getal tussen 1000 en 2000. Het midden is 1500. De flight controller mengt die vier getallen tot een snelheid voor elke motor."
     },
     "doneTitle": {
-        "message": "Klaar om op te stijgen"
+        "message": "Klaar om te vliegen"
     },
     "doneLead": {
         "message": "Je drone is ingesteld. Iemand van DroneTeam helpt je met de eerste vlucht."
@@ -422,9 +422,6 @@
     "welcomeLanguage": {
         "message": "Taal"
     },
-    "welcomeEyebrow": {
-        "message": "DroneTeam Twente workshop"
-    },
     "welcomeTitle": {
         "message": "Tijd om je drone wakker te maken"
     },
@@ -441,7 +438,7 @@
         "message": "Druk op Verbind"
     },
     "welcomeStep2Help": {
-        "message": "Dat is de groene knop in het menu. Je browser vraagt welk apparaat je wilt gebruiken: kies degene met STM32 of Betaflight in de naam."
+        "message": "Druk hieronder op de groene knop Verbind. Je browser vraagt welk apparaat je wilt gebruiken: kies degene met STM32 of Betaflight in de naam."
     },
     "welcomeStep3": {
         "message": "Volg de stappen"
@@ -475,5 +472,197 @@
     },
     "welcomeResume": {
         "message": "Welkom terug! Druk op Verbind om verder te gaan bij stap {{n}} ({{step}})."
+    },
+    "stepOf": {
+        "message": "{{n}} van {{total}}"
+    },
+    "stepMeet": {
+        "message": "Onderdelen"
+    },
+    "stepSpin": {
+        "message": "Motortest"
+    },
+    "meetTitle": {
+        "message": "Wat zit er in de doos"
+    },
+    "meetLead": {
+        "message": "Kies een onderdeel om te zien wat het doet. Sleep de drone om hem van alle kanten te bekijken en scroll om te zoomen."
+    },
+    "meetHint": {
+        "message": "Begin met de flight controller: het brein van de drone."
+    },
+    "meetDone": {
+        "message": "Volgende: de gyroscoop"
+    },
+    "partFrame": {
+        "message": "Frame"
+    },
+    "partFrameFact": {
+        "message": "3D-geprint in PLA: één body, vier vakwerkarmen en een deksel met vier draaisloten. De gaten in de armen maken ze licht maar stijf."
+    },
+    "partFc": {
+        "message": "Flight controller"
+    },
+    "partFcFact": {
+        "message": "Een F4V3S-bord met een STM32F405-processor op 168 MHz. Er draait Betaflight op; het leest de gyroscoop duizenden keren per seconde uit en bepaalt hoe snel elke motor draait."
+    },
+    "partPdb": {
+        "message": "Stroomverdeler"
+    },
+    "partPdbFact": {
+        "message": "Een Matek power hub. De accu gaat er één keer in (XT60) en het bord verdeelt de stroom over de vier ESC's (XT30) en een 5 V-lijn voor de flight controller."
+    },
+    "partEsc": {
+        "message": "ESC"
+    },
+    "partEscFact": {
+        "message": "Een LittleBee 20 A snelheidsregelaar, één per motor. Hij maakt van accustroom de driefasige pulsen die een borstelloze motor nodig heeft."
+    },
+    "partMotor": {
+        "message": "Motor"
+    },
+    "partMotorFact": {
+        "message": "Een Uangel X2807 1300 KV. KV betekent toeren per volt: op een 3S-accu (11,1 V) is dat zo'n 14.000 toeren per minuut zonder propeller."
+    },
+    "partProp": {
+        "message": "Propeller"
+    },
+    "partPropFact": {
+        "message": "MR 8045: 8 inch doorsnede en 4,5 inch spoed. Twee draaien met de klok mee en twee tegen de klok in."
+    },
+    "partReceiver": {
+        "message": "Ontvanger"
+    },
+    "partReceiverFact": {
+        "message": "Een RadioMaster RP2 (ExpressLRS). Hij vangt je zender op via 2,4 GHz en geeft de stickstanden door aan de flight controller."
+    },
+    "partBattery": {
+        "message": "Accu"
+    },
+    "partBatteryFact": {
+        "message": "Een Turnigy 3S 2200 mAh LiPo: drie cellen in serie, 11,1 V. Nooit doorprikken en de stekker nooit kortsluiten."
+    },
+    "axisRoll": {
+        "message": "Roll"
+    },
+    "axisPitch": {
+        "message": "Pitch"
+    },
+    "axisYaw": {
+        "message": "Yaw"
+    },
+    "alignReplay": {
+        "message": "Laat nog eens zien"
+    },
+    "stillWaiting": {
+        "message": "Stilhouden…"
+    },
+    "stillMoving": {
+        "message": "Hij beweegt. Zet hem neer en laat los."
+    },
+    "stillTilted": {
+        "message": "Hij staat scheef. Zet hem op een vlakke tafel."
+    },
+    "stillReady": {
+        "message": "Plat en stil. Klaar om te kalibreren."
+    },
+    "escTitle": {
+        "message": "De ESC"
+    },
+    "escLead": {
+        "message": "Elke motor heeft zijn eigen ESC: een elektronische snelheidsregelaar. De flight controller zegt hoe snel, de ESC schakelt de stroom."
+    },
+    "escFact1": {
+        "message": "Een borstelloze motor heeft drie draden. De ESC schakelt de accustroom duizenden keren per seconde tussen die draden, zodat de magneten in de bel steeds verder worden rondgetrokken."
+    },
+    "escFact2": {
+        "message": "De volgorde van die drie draden bepaalt de draairichting. Wissel er twee om en de motor draait de andere kant op."
+    },
+    "escFact3": {
+        "message": "Op de DronoBox zit elke ESC op zijn arm, vlak naast de motor die hij aanstuurt."
+    },
+    "escNext": {
+        "message": "Waarom maakt de richting uit?"
+    },
+    "sandboxTitle": {
+        "message": "Waarom de motoren in paren draaien"
+    },
+    "sandboxLead": {
+        "message": "Kies voor elke motor een draairichting, druk op opstijgen en kijk wat de drone doet."
+    },
+    "sandboxTry": {
+        "message": "Probeer:"
+    },
+    "sandboxPresetKit": {
+        "message": "DronoBox-indeling"
+    },
+    "sandboxPresetAllCw": {
+        "message": "Alles met de klok mee"
+    },
+    "sandboxPresetSplit": {
+        "message": "Links zo, rechts andersom"
+    },
+    "sandbox_stable": {
+        "message": "Stabiel. Diagonale motoren draaien dezelfde kant op, dus hun draaikracht heft elkaar op en de drone blijft hangen."
+    },
+    "sandbox_spinCw": {
+        "message": "Hij tolt met de klok mee! Meer propellers draaien tegen de klok in, en de body draait de andere kant op."
+    },
+    "sandbox_spinCcw": {
+        "message": "Hij tolt tegen de klok in! Meer propellers draaien met de klok mee, en de body draait de andere kant op."
+    },
+    "sandbox_unstable": {
+        "message": "Hij wiebelt en slaat om. De draaikracht is in balans, maar de flight controller verwacht diagonale paren, dus zijn correcties duwen de verkeerde motoren."
+    },
+    "sandboxTakeOff": {
+        "message": "Opstijgen"
+    },
+    "sandboxLand": {
+        "message": "Landen"
+    },
+    "stageLoading": {
+        "message": "Drone laden…"
+    },
+    "stageFailed": {
+        "message": "De 3D-drone kon niet laden. Alles werkt ook zonder."
+    },
+    "welcomeDemo": {
+        "message": "Probeer het zonder drone"
+    },
+    "gameTitle": {
+        "message": "Kopieer de geest"
+    },
+    "gameLead": {
+        "message": "Een doorzichtige drone neemt een houding aan. Kantel de jouwe tot ze precies over elkaar liggen en houd hem stil. Vijf houdingen, op tijd."
+    },
+    "gameStart": {
+        "message": "Spelen"
+    },
+    "gameAgain": {
+        "message": "Nog een keer"
+    },
+    "gameStop": {
+        "message": "Stoppen"
+    },
+    "gamePose": {
+        "message": "Houding {{n}} van {{total}}:"
+    },
+    "gameRoll": {
+        "message": "roll"
+    },
+    "gamePitch": {
+        "message": "pitch"
+    },
+    "gameBoth": {
+        "message": "roll en pitch"
+    },
+    "gameMove": {
+        "message": "Kantel tot de geest groen wordt."
+    },
+    "gameHold": {
+        "message": "Vasthouden…"
+    },
+    "gameDone": {
+        "message": "Alle vijf in {{seconds}} s."
     }
 }

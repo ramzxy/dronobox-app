@@ -15,7 +15,10 @@ import nuxtUiViteOptions from "./nuxt-ui.vite.js";
 // DronoBox fork: Vercel builds have no .git directory, so fall back to the commit it reports.
 function readCommitHash() {
     try {
-        return child.execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim();
+        return child
+            .execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+            .toString()
+            .trim();
     } catch {
         return (process.env.VERCEL_GIT_COMMIT_SHA ?? "unknown").slice(0, 7);
     }
@@ -223,7 +226,8 @@ export default defineConfig({
         VitePWA({
             registerType: "prompt",
             workbox: {
-                globPatterns: ["**/*.{js,css,html,ico,png,svg,json,mcm,gltf}"],
+                // DronoBox fork: the kit mesh too, so the 3D drone works offline at workshops.
+                globPatterns: ["**/*.{js,css,html,ico,png,svg,json,mcm,gltf}", "dronobox/*.bin"],
                 // 5MB
                 maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
             },

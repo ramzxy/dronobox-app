@@ -1,68 +1,93 @@
 <template>
-    <div class="dronobox-welcome">
-        <div class="dronobox-welcome__inner">
-            <div class="dronobox-welcome__lang" role="group" :aria-label="$t('dronobox:welcomeLanguage')">
-                <UButton
-                    v-for="lang in LANGUAGES"
-                    :key="lang.code"
-                    size="xs"
-                    :variant="currentLanguage === lang.code ? 'soft' : 'ghost'"
-                    color="neutral"
-                    :label="lang.label"
-                    @click="setLanguage(lang.code)"
-                />
+    <div class="dronobox-welcome dark dronobox-backdrop">
+        <section class="dronobox-welcome__copy">
+            <div class="dronobox-welcome__top">
+                <div class="dronobox-welcome__brand">
+                    <strong>DronoBox</strong>
+                    <span>DroneTeam Twente</span>
+                </div>
+                <div class="dronobox-welcome__lang" role="group" :aria-label="$t('dronobox:welcomeLanguage')">
+                    <UButton
+                        v-for="lang in LANGUAGES"
+                        :key="lang.code"
+                        size="xs"
+                        :variant="currentLanguage === lang.code ? 'soft' : 'ghost'"
+                        color="neutral"
+                        :label="lang.label"
+                        @click="setLanguage(lang.code)"
+                    />
+                </div>
             </div>
 
-            <p class="dronobox-welcome__eyebrow">{{ $t("dronobox:welcomeEyebrow") }}</p>
-            <h1 class="dronobox-welcome__title">{{ $t("dronobox:welcomeTitle") }}</h1>
-            <p class="dronobox-welcome__lead">{{ $t("dronobox:welcomeLead") }}</p>
+            <div class="dronobox-welcome__body">
+                <h1 class="dronobox-welcome__title">{{ $t("dronobox:welcomeTitle") }}</h1>
+                <p class="dronobox-welcome__lead">{{ $t("dronobox:welcomeLead") }}</p>
 
-            <p v-if="resume" class="dronobox-welcome__resume" role="status">
-                <UIcon name="i-lucide-history" />
-                <span>{{ $t("dronobox:welcomeResume", resume) }}</span>
-            </p>
+                <p v-if="resume" class="dronobox-welcome__resume" role="status">
+                    <UIcon name="i-lucide-history" />
+                    <span>{{ $t("dronobox:welcomeResume", resume) }}</span>
+                </p>
 
-            <ol class="dronobox-welcome__steps">
-                <li>
-                    <span class="dronobox-welcome__num">1</span>
-                    <div>
-                        <strong>{{ $t("dronobox:welcomeStep1") }}</strong>
-                        <span>{{ $t("dronobox:welcomeStep1Help") }}</span>
-                    </div>
-                </li>
-                <li>
-                    <span class="dronobox-welcome__num">2</span>
-                    <div>
-                        <strong>{{ $t("dronobox:welcomeStep2") }}</strong>
-                        <span>{{ $t("dronobox:welcomeStep2Help") }}</span>
-                    </div>
-                </li>
-                <li>
-                    <span class="dronobox-welcome__num">3</span>
-                    <div>
-                        <strong>{{ $t("dronobox:welcomeStep3") }}</strong>
-                        <span>{{ $t("dronobox:welcomeStep3Help") }}</span>
-                    </div>
-                </li>
-            </ol>
+                <ol class="dronobox-welcome__steps">
+                    <li>
+                        <span class="dronobox-welcome__num">1</span>
+                        <div>
+                            <strong>{{ $t("dronobox:welcomeStep1") }}</strong>
+                            <span>{{ $t("dronobox:welcomeStep1Help") }}</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="dronobox-welcome__num">2</span>
+                        <div>
+                            <strong>{{ $t("dronobox:welcomeStep2") }}</strong>
+                            <span>{{ $t("dronobox:welcomeStep2Help") }}</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="dronobox-welcome__num">3</span>
+                        <div>
+                            <strong>{{ $t("dronobox:welcomeStep3") }}</strong>
+                            <span>{{ $t("dronobox:welcomeStep3Help") }}</span>
+                        </div>
+                    </li>
+                </ol>
 
-            <details class="dronobox-welcome__trouble">
-                <summary>{{ $t("dronobox:welcomeTroubleTitle") }}</summary>
-                <ul>
-                    <li>{{ $t("dronobox:welcomeTrouble1") }}</li>
-                    <li>{{ $t("dronobox:welcomeTrouble2") }}</li>
-                    <li>{{ $t("dronobox:welcomeTrouble3") }}</li>
-                    <li>{{ $t("dronobox:welcomeTrouble4") }}</li>
-                </ul>
-            </details>
+                <div class="dronobox-welcome__connect">
+                    <ConnectButton />
+                    <UButton
+                        v-if="canDemo"
+                        color="neutral"
+                        variant="ghost"
+                        icon="i-lucide-flask-conical"
+                        :label="$t('dronobox:welcomeDemo')"
+                        @click="connectVirtual"
+                    />
+                </div>
+
+                <details class="dronobox-welcome__trouble">
+                    <summary>{{ $t("dronobox:welcomeTroubleTitle") }}</summary>
+                    <ul>
+                        <li>{{ $t("dronobox:welcomeTrouble1") }}</li>
+                        <li>{{ $t("dronobox:welcomeTrouble2") }}</li>
+                        <li>{{ $t("dronobox:welcomeTrouble3") }}</li>
+                        <li>{{ $t("dronobox:welcomeTrouble4") }}</li>
+                    </ul>
+                </details>
+            </div>
 
             <p class="dronobox-welcome__footer">
                 {{ $t("dronobox:welcomeFooter") }}
                 <a :href="DRONOBOX_KIT.sourceUrl" target="_blank" rel="noopener noreferrer">
                     {{ $t("dronobox:welcomeSource") }}
                 </a>
+                <button type="button" class="dronobox-welcome__instructor" @click="instructorOpen = true">
+                    {{ $t("dronobox:instructorMenu") }}
+                </button>
             </p>
-        </div>
+        </section>
+
+        <KitStageView class="dronobox-welcome__stage" :input="{ shot: 'hero' }" draggable />
+        <InstructorDialog v-model:open="instructorOpen" />
     </div>
 </template>
 
@@ -71,8 +96,23 @@ import { computed, ref } from "vue";
 import { i18n } from "@/js/localization";
 import { DRONOBOX_KIT } from "@/dronobox/kit";
 import { DRONOBOX_STEPS, useDronoBoxStore } from "@/stores/dronobox";
+import ConnectButton from "@/components/device-picker/ConnectButton.vue";
+import DeviceHandler from "@/js/device_handler";
+import { connectDisconnect } from "@/js/serial_backend";
+import KitStageView from "./KitStageView.vue";
+import InstructorDialog from "./InstructorDialog.vue";
 
 const store = useDronoBoxStore();
+const instructorOpen = ref(false);
+
+// Walk through the lessons with Betaflight's built-in pretend flight controller. Only in dev
+// builds and for instructors: participants always plug in their real drone.
+const canDemo = computed(() => import.meta.env.DEV || store.instructorUnlocked);
+
+function connectVirtual(): void {
+    DeviceHandler.devicePicker.selectedDevice = "virtual";
+    connectDisconnect();
+}
 
 // A cable knocked loose or a save that did not reconnect lands here mid-flow; say where the
 // group was so they know pressing Connect carries on rather than starting over.
@@ -102,69 +142,82 @@ function setLanguage(code: string): void {
 
 <style lang="less">
 .dronobox-welcome {
-    display: flex;
-    justify-content: center;
+    --ui-primary: var(--dronobox-accent);
+    display: grid;
+    grid-template-columns: minmax(24rem, 34rem) minmax(0, 1fr);
     width: 100%;
     min-height: 100%;
-    padding: clamp(1.5rem, 6vh, 4rem) 1.5rem 2rem;
-    background: var(--ui-bg);
 
-    &__inner {
-        position: relative;
-        width: 100%;
-        max-width: 44rem;
+    &__copy {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        padding: 1.5rem 2rem 1.5rem 2.5rem;
+    }
+    &__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    &__brand {
+        display: grid;
+        line-height: 1.05;
+
+        strong {
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        span {
+            font-size: 0.72rem;
+            color: var(--dronobox-ink-faint);
+        }
     }
     &__lang {
-        position: absolute;
-        top: 0;
-        right: 0;
         display: flex;
         gap: 0.25rem;
     }
-    &__eyebrow {
-        margin: 0;
-        font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--ui-primary);
+    &__body {
+        display: grid;
+        gap: 1.1rem;
+        margin: auto 0;
     }
     &__title {
-        margin: 0.4rem 0 0;
-        font-size: clamp(2rem, 4.5vw, 3rem);
+        margin: 0;
+        font-size: clamp(2.3rem, 4.2vw, 3.6rem);
         font-weight: 800;
-        line-height: 1.05;
-        letter-spacing: -0.02em;
-        color: var(--ui-text-highlighted);
+        line-height: 1;
+        letter-spacing: -0.035em;
+        color: var(--dronobox-ink);
     }
     &__lead {
-        margin: 0.75rem 0 0;
-        font-size: 1.1rem;
+        margin: 0;
+        font-size: 1.15rem;
         line-height: 1.5;
-        color: var(--ui-text-muted);
+        color: var(--dronobox-ink-soft);
     }
     &__resume {
         display: flex;
         align-items: center;
         gap: 0.6rem;
-        margin: 1.5rem 0 0;
+        margin: 0;
         padding: 0.8rem 1rem;
-        border: 1px solid var(--ui-primary);
+        border: 1px solid var(--dronobox-accent);
         border-radius: 0.75rem;
+        background: var(--dronobox-panel);
         font-weight: 600;
-        color: var(--ui-text-highlighted);
 
         .iconify {
             flex: none;
             width: 1.25rem;
             height: 1.25rem;
-            color: var(--ui-primary);
+            color: var(--dronobox-accent);
         }
     }
     &__steps {
         display: grid;
-        gap: 0.75rem;
-        margin: 2rem 0 0;
+        gap: 0.9rem;
+        margin: 0.5rem 0 0;
         padding: 0;
         list-style: none;
 
@@ -172,21 +225,17 @@ function setLanguage(code: string): void {
             display: flex;
             gap: 0.9rem;
             align-items: flex-start;
-            padding: 1rem 1.1rem;
-            border: 1px solid var(--ui-border);
-            border-radius: 0.75rem;
-            background: var(--ui-bg-elevated);
         }
         div {
             display: grid;
-            gap: 0.2rem;
+            gap: 0.15rem;
         }
         strong {
-            font-size: 1.05rem;
-            color: var(--ui-text-highlighted);
+            font-size: 1.02rem;
+            color: var(--dronobox-ink);
         }
         span {
-            color: var(--ui-text-muted);
+            color: var(--dronobox-ink-soft);
             line-height: 1.45;
         }
     }
@@ -194,21 +243,40 @@ function setLanguage(code: string): void {
         flex: none;
         display: grid;
         place-items: center;
-        width: 2rem;
-        height: 2rem;
+        width: 1.9rem;
+        height: 1.9rem;
+        border: 1px solid var(--dronobox-line-strong);
         border-radius: 999px;
-        background: var(--ui-primary);
-        color: var(--ui-bg);
+        color: var(--dronobox-accent);
         font-weight: 800;
     }
+    &__connect {
+        display: grid;
+        gap: 0.5rem;
+        justify-items: start;
+        max-width: 22rem;
+        margin-top: 0.4rem;
+
+        .sidebar-connect {
+            width: 100%;
+        }
+
+        .sidebar-connect__main {
+            height: 3rem;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .sidebar-connect__group > button:last-child {
+            height: 3rem;
+        }
+    }
     &__trouble {
-        margin-top: 1.5rem;
-        color: var(--ui-text-muted);
+        color: var(--dronobox-ink-soft);
 
         summary {
             cursor: pointer;
             font-weight: 600;
-            color: var(--ui-text);
+            color: var(--dronobox-ink);
         }
         ul {
             display: grid;
@@ -219,20 +287,39 @@ function setLanguage(code: string): void {
         }
     }
     &__footer {
-        margin: 2.5rem 0 0;
-        font-size: 0.8rem;
-        color: var(--ui-text-dimmed);
+        margin: 0;
+        font-size: 0.78rem;
+        color: var(--dronobox-ink-faint);
 
-        a {
-            color: var(--ui-text-muted);
+        a,
+        button {
+            color: var(--dronobox-ink-soft);
             text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        button {
+            margin-left: 0.75rem;
+            padding: 0;
+            border: 0;
+            background: none;
+            font: inherit;
+            cursor: pointer;
         }
     }
+    &__stage {
+        min-height: 26rem;
+    }
 
-    @media (max-width: 575px) {
-        &__lang {
-            position: static;
-            margin-bottom: 1rem;
+    @media (max-width: 960px) {
+        grid-template-columns: 1fr;
+
+        &__stage {
+            order: -1;
+            height: 38vh;
+            min-height: 16rem;
+        }
+        &__copy {
+            padding: 1.25rem 1rem 2rem;
         }
     }
 }

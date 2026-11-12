@@ -1,6 +1,6 @@
 <template>
     <UApp :locale="uiLocale" :tooltip="{ delayDuration: 100 }" portal="#main-wrapper">
-        <div class="app-wrapper">
+        <div class="app-wrapper" :class="{ 'dronobox-immersive': dronoboxImmersive }">
             <div id="background" v-if="isMobileSidebarOpen" aria-hidden="true" @click="isRevealed = false"></div>
             <div id="side_menu_swipe"></div>
             <div v-if="isLandingTab" class="mobile-topbar" :class="{ 'mobile-topbar--hidden': topbarHidden }">
@@ -64,6 +64,7 @@ import GlobalDialogs from "./components/dialogs/GlobalDialogs.vue";
 import LogPanel from "./components/log/LogPanel.vue";
 import Sidebar from "./components/sidebar/Sidebar.vue";
 import DronoBoxLogo from "./components/dronobox/DronoBoxLogo.vue";
+import { useDronoBoxStore } from "./stores/dronobox";
 import PortUsageModule from "./js/port_usage";
 import { i18n } from "./js/localization";
 import { useUiLocale } from "./composables/useUiLocale";
@@ -144,6 +145,12 @@ watch(isCompactBreakpoint, (compact) => {
 // The branded top bar is a landing-page affordance. Every other tab reaches the drawer from the
 // hamburger in the status bar instead, so the bar only costs vertical space there.
 const isLandingTab = computed(() => vueTabState.activeTabName === "landing");
+
+// DronoBox fork: while the workshop lock is on, the welcome page and the guided tab fill the window.
+const dronobox = useDronoBoxStore();
+const dronoboxImmersive = computed(
+    () => dronobox.workshopLocked && ["landing", "dronobox"].includes(vueTabState.activeTabName ?? ""),
+);
 
 // Connecting is the app's primary action and it lives in the drawer, which the phone shell no
 // longer opens. Teleport it into the floating chrome there, and leave it in place everywhere else.

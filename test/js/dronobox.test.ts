@@ -22,7 +22,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { decodeArmingFlags } from "../../src/dronobox/armingReasons";
-import { DRONOBOX_KIT } from "../../src/dronobox/kit";
+import { DRONOBOX_KIT, type SpinDirection } from "../../src/dronobox/kit";
+import { sandboxOutcome } from "../../src/dronobox/sandbox";
 import { useDronoBoxStore } from "../../src/stores/dronobox";
 
 describe("decodeArmingFlags", () => {
@@ -64,14 +65,14 @@ describe("useDronoBoxStore", () => {
         it("keeps later steps closed until the earlier ones are done", () => {
             const store = useDronoBoxStore();
 
-            expect(store.canOpen("motors")).toBe(false);
-            store.goTo("motors");
-            expect(store.step).toBe("gyro");
+            expect(store.canOpen("spin")).toBe(false);
+            store.goTo("spin");
+            expect(store.step).toBe("meet");
 
-            for (const step of ["gyro", "align", "level", "safety"] as const) {
+            for (const step of ["meet", "gyro", "align", "level", "motors", "safety"] as const) {
                 store.completeAndAdvance(step);
             }
-            expect(store.step).toBe("motors");
+            expect(store.step).toBe("spin");
             expect(store.canOpen("radio")).toBe(false);
         });
 
@@ -114,6 +115,7 @@ describe("useDronoBoxStore", () => {
 
     it("restores progress after the tab remounts, e.g. after a save and reboot", async () => {
         const store = useDronoBoxStore();
+        store.completeAndAdvance("meet");
         store.completeAndAdvance("gyro");
         await Promise.resolve();
 
@@ -122,5 +124,27 @@ describe("useDronoBoxStore", () => {
 
         expect(restored.step).toBe("align");
         expect(restored.isCompleted("gyro")).toBe(true);
+    });
+});
+
+describe("sandboxOutcome", () => {
+    const layout = (pick: (motor: (typeof DRONOBOX_KIT.motors)[number]) => SpinDirection) =>
+        Object.fromEntries(DRONOBOX_KIT.motors.map((m) => [m.number, pick(m)])) as Record<number, SpinDirection>;
+
+    it("hovers with the kit's own layout", () => {
+        expect(sandboxOutcome(layout((m) => m.direction))).toBe("stable");
+    });
+
+    it("spins the body against the side with more props", () => {
+        expect(sandboxOutcome(layout(() => "cw"))).toBe("spinCcw");
+        expect(sandboxOutcome(layout(() => "ccw"))).toBe("spinCw");
+    });
+
+    it("flips when the torques balance but the pairs are not diagonal", () => {
+        expect(sandboxOutcome(layout((m) => (m.position.endsWith("Left") ? "cw" : "ccw")))).toBe("unstable");
+    });
+
+    it("flips with every motor reversed: balanced, but the flight controller's yaw works backwards", () => {
+        expect(sandboxOutcome(layout((m) => (m.direction === "cw" ? "ccw" : "cw")))).toBe("unstable");
     });
 });

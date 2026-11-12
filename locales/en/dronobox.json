@@ -21,34 +21,34 @@
         "message": "Why?"
     },
     "stepGyro": {
-        "message": "Wake it up"
+        "message": "Gyroscope"
     },
     "stepAlign": {
-        "message": "Which way is forward?"
+        "message": "Direction"
     },
     "stepLevel": {
-        "message": "Find level"
+        "message": "Level"
     },
     "stepSafety": {
-        "message": "Safety check"
+        "message": "Safety"
     },
     "stepMotors": {
-        "message": "Spin test"
+        "message": "Motors"
     },
     "stepRadio": {
-        "message": "Radio check"
+        "message": "Radio"
     },
     "stepDone": {
-        "message": "Ready to fly"
+        "message": "Ready"
     },
     "gyroTitle": {
-        "message": "Is anybody in there?"
+        "message": "The gyroscope"
     },
     "gyroLead": {
         "message": "The flight controller is the drone's brain. On it sits a tiny chip called a gyroscope that feels every rotation."
     },
     "gyroTask": {
-        "message": "Pick up your drone and tilt it slowly in every direction. The drone on the right copies you, and the bar fills up."
+        "message": "Pick up your drone and tilt it slowly in every direction. The drone on screen copies you, and the bars fill up."
     },
     "gyroWhy": {
         "message": "A drone can't balance on its own. Thousands of times every second the flight controller reads the gyro, notices it is starting to tip, and changes the motor speeds to catch itself. No human pilot is that fast."
@@ -63,7 +63,7 @@
         "message": "It follows me"
     },
     "alignTitle": {
-        "message": "Which way is forward?"
+        "message": "Tell it which way is forward"
     },
     "alignLead": {
         "message": "The flight controller doesn't know how it was mounted. In the DronoBox it sits turned 270° clockwise, so we have to tell it."
@@ -102,7 +102,7 @@
         "message": "If the board thinks forward is to the left, pushing the stick forward would make the drone fly sideways. Saving makes the board restart; this page comes back by itself."
     },
     "levelTitle": {
-        "message": "What does flat look like?"
+        "message": "Calibrate the accelerometer"
     },
     "levelLead": {
         "message": "The accelerometer feels gravity, so it knows which way is down. Now we show it what flat looks like."
@@ -123,7 +123,7 @@
         "message": "In angle mode, the beginner mode, the drone levels itself out when you let go of the sticks. It can only do that if it knows what level is."
     },
     "safetyTitle": {
-        "message": "Safety check"
+        "message": "Before the motors spin"
     },
     "safetyLead": {
         "message": "Next the motors will spin. A spinning propeller can cut your fingers, so the propellers stay off for the whole test."
@@ -228,7 +228,7 @@
         "message": "back right"
     },
     "radioTitle": {
-        "message": "Talk to it"
+        "message": "Radio check"
     },
     "radioLead": {
         "message": "Switch on your transmitter. Every stick movement travels through the air to the receiver inside the drone."
@@ -285,7 +285,7 @@
         "message": "The receiver turns each stick into a number between 1000 and 2000. Middle is 1500. The flight controller mixes those four numbers into a speed for every motor."
     },
     "doneTitle": {
-        "message": "Ready for take-off"
+        "message": "Ready to fly"
     },
     "doneLead": {
         "message": "Your drone is set up. A DroneTeam member will help you with the first flight."
@@ -422,9 +422,6 @@
     "welcomeLanguage": {
         "message": "Language"
     },
-    "welcomeEyebrow": {
-        "message": "DroneTeam Twente workshop"
-    },
     "welcomeTitle": {
         "message": "Let's wake up your drone"
     },
@@ -441,7 +438,7 @@
         "message": "Press Connect"
     },
     "welcomeStep2Help": {
-        "message": "It's the green button in the menu. Your browser asks which device to use: pick the one that mentions STM32 or Betaflight."
+        "message": "Press the green Connect button below. Your browser asks which device to use: pick the one that mentions STM32 or Betaflight."
     },
     "welcomeStep3": {
         "message": "Follow the steps"
@@ -475,5 +472,197 @@
     },
     "welcomeResume": {
         "message": "Welcome back! Press Connect to carry on from step {{n}} ({{step}})."
+    },
+    "stepOf": {
+        "message": "{{n}} of {{total}}"
+    },
+    "stepMeet": {
+        "message": "Parts"
+    },
+    "stepSpin": {
+        "message": "Spin test"
+    },
+    "meetTitle": {
+        "message": "What's in the box"
+    },
+    "meetLead": {
+        "message": "Pick a part to see what it does. Drag the drone to look at it from any side, and scroll to zoom."
+    },
+    "meetHint": {
+        "message": "Start with the flight controller: the drone's brain."
+    },
+    "meetDone": {
+        "message": "Next: the gyroscope"
+    },
+    "partFrame": {
+        "message": "Frame"
+    },
+    "partFrameFact": {
+        "message": "3D-printed in PLA: one body, four truss arms and a lid with four twist locks. The holes in the arms keep them light but stiff."
+    },
+    "partFc": {
+        "message": "Flight controller"
+    },
+    "partFcFact": {
+        "message": "An F4V3S board with an STM32F405 processor at 168 MHz. It runs Betaflight, reads the gyroscope thousands of times a second and decides how fast each motor spins."
+    },
+    "partPdb": {
+        "message": "Power board"
+    },
+    "partPdbFact": {
+        "message": "A Matek power hub. The battery plugs in once (XT60) and the board shares that power out to the four ESCs (XT30) and a 5 V line for the flight controller."
+    },
+    "partEsc": {
+        "message": "ESC"
+    },
+    "partEscFact": {
+        "message": "A LittleBee 20 A speed controller, one per motor. It turns battery power into the three-phase pulses a brushless motor needs."
+    },
+    "partMotor": {
+        "message": "Motor"
+    },
+    "partMotorFact": {
+        "message": "A Uangel X2807 1300 KV. KV means rpm per volt: on a 3S battery (11.1 V) that is about 14,000 rpm with nothing attached."
+    },
+    "partProp": {
+        "message": "Propeller"
+    },
+    "partPropFact": {
+        "message": "MR 8045: 8 inch across with a 4.5 inch pitch. Two spin clockwise and two counter-clockwise."
+    },
+    "partReceiver": {
+        "message": "Receiver"
+    },
+    "partReceiverFact": {
+        "message": "A RadioMaster RP2 (ExpressLRS). It picks up your transmitter on 2.4 GHz and passes the stick positions to the flight controller."
+    },
+    "partBattery": {
+        "message": "Battery"
+    },
+    "partBatteryFact": {
+        "message": "A Turnigy 3S 2200 mAh LiPo: three cells in series, 11.1 V. Never puncture it or short the plug."
+    },
+    "axisRoll": {
+        "message": "Roll"
+    },
+    "axisPitch": {
+        "message": "Pitch"
+    },
+    "axisYaw": {
+        "message": "Yaw"
+    },
+    "alignReplay": {
+        "message": "Show me again"
+    },
+    "stillWaiting": {
+        "message": "Hold still…"
+    },
+    "stillMoving": {
+        "message": "It's moving. Put it down and let go."
+    },
+    "stillTilted": {
+        "message": "It's tilted. Put it on a flat table."
+    },
+    "stillReady": {
+        "message": "Flat and still. Ready to calibrate."
+    },
+    "escTitle": {
+        "message": "The ESC"
+    },
+    "escLead": {
+        "message": "Each motor has its own ESC: an electronic speed controller. The flight controller says how fast; the ESC switches the power."
+    },
+    "escFact1": {
+        "message": "A brushless motor has three wires. The ESC switches battery power between them thousands of times a second, so the magnets in the bell keep getting pulled round."
+    },
+    "escFact2": {
+        "message": "The order of those three wires decides the direction. Swap any two and the motor turns the other way."
+    },
+    "escFact3": {
+        "message": "On the DronoBox each ESC sits on its arm, right next to the motor it drives."
+    },
+    "escNext": {
+        "message": "Why does direction matter?"
+    },
+    "sandboxTitle": {
+        "message": "Why the motors spin in pairs"
+    },
+    "sandboxLead": {
+        "message": "Choose a direction for each motor, press take off and watch what the drone does."
+    },
+    "sandboxTry": {
+        "message": "Try:"
+    },
+    "sandboxPresetKit": {
+        "message": "DronoBox layout"
+    },
+    "sandboxPresetAllCw": {
+        "message": "All clockwise"
+    },
+    "sandboxPresetSplit": {
+        "message": "Left one way, right the other"
+    },
+    "sandbox_stable": {
+        "message": "Stable. Diagonal motors turn the same way, so their twisting cancels out and the drone hovers."
+    },
+    "sandbox_spinCw": {
+        "message": "It spins clockwise! More props turn counter-clockwise, and the body twists the opposite way."
+    },
+    "sandbox_spinCcw": {
+        "message": "It spins counter-clockwise! More props turn clockwise, and the body twists the opposite way."
+    },
+    "sandbox_unstable": {
+        "message": "It wobbles and flips. The twisting balances out, but the flight controller expects diagonal pairs, so its corrections push the wrong motors."
+    },
+    "sandboxTakeOff": {
+        "message": "Take off"
+    },
+    "sandboxLand": {
+        "message": "Land"
+    },
+    "stageLoading": {
+        "message": "Loading the drone…"
+    },
+    "stageFailed": {
+        "message": "The 3D drone couldn't load. Everything still works without it."
+    },
+    "welcomeDemo": {
+        "message": "Try it without a drone"
+    },
+    "gameTitle": {
+        "message": "Match the ghost"
+    },
+    "gameLead": {
+        "message": "A see-through drone takes a pose. Tilt yours until the two line up and hold it there. Five poses, against the clock."
+    },
+    "gameStart": {
+        "message": "Play"
+    },
+    "gameAgain": {
+        "message": "Play again"
+    },
+    "gameStop": {
+        "message": "Stop"
+    },
+    "gamePose": {
+        "message": "Pose {{n}} of {{total}}:"
+    },
+    "gameRoll": {
+        "message": "roll"
+    },
+    "gamePitch": {
+        "message": "pitch"
+    },
+    "gameBoth": {
+        "message": "roll and pitch"
+    },
+    "gameMove": {
+        "message": "Tilt until the ghost turns green."
+    },
+    "gameHold": {
+        "message": "Hold it…"
+    },
+    "gameDone": {
+        "message": "All five in {{seconds}} s."
     }
 }

@@ -1,0 +1,51 @@
+/*
+ * DronoBox fork: colour tokens for the workshop screens, and the immersive mode that hides the
+ * Betaflight chrome (sidebar, status bar, account button) while the workshop lock is on.
+ *
+ * The workshop screens are a dark navy stage in both light and dark mode: the 3D drone reads best
+ * against it, and it matches the DroneTeam Twente blue.
+ */
+
+:root {
+    --dronobox-brand: #0063ad;
+    --dronobox-bg-0: #04132c;
+    --dronobox-bg-1: #08244f;
+    --dronobox-bg-2: #0d3570;
+    --dronobox-panel: #071d42;
+    --dronobox-panel-raised: #0b2a5a;
+    --dronobox-chip: rgba(6, 24, 54, 0.82);
+    --dronobox-line: rgba(150, 190, 255, 0.18);
+    --dronobox-line-strong: rgba(150, 190, 255, 0.34);
+    --dronobox-ink: #eef4ff;
+    --dronobox-ink-soft: rgba(226, 236, 255, 0.72);
+    --dronobox-ink-faint: rgba(226, 236, 255, 0.48);
+    --dronobox-accent: #4da3ff;
+    --dronobox-on-accent: #031430;
+    --dronobox-ok: #46d68c;
+    --dronobox-warn: #ffc94d;
+    --dronobox-bad: #ff6b6b;
+    --dronobox-roll: #ff5a5f;
+    --dronobox-pitch: #46d68c;
+    --dronobox-yaw: #4da3ff;
+}
+
+.dronobox-immersive .tab_container,
+.dronobox-immersive #status-bar,
+.dronobox-immersive .floating-account,
+.dronobox-immersive .floating-connect,
+.dronobox-immersive .mobile-topbar {
+    display: none !important;
+}
+
+.dronobox-immersive #content {
+    background: var(--dronobox-bg-0);
+    scrollbar-gutter: auto;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* The workshop screens sit on one flat navy; the 3D drone's own contact shadow grounds it. */
+.dronobox-backdrop {
+    background: var(--dronobox-bg-1);
+    color: var(--dronobox-ink);
+}

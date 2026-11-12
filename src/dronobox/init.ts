@@ -21,6 +21,7 @@
 
 import { get as getConfig, set as setConfig } from "../js/ConfigStorage";
 import DeviceHandler from "../js/device_handler";
+import "./dronobox.css";
 
 /**
  * Defaults the DronoBox fork changes on a laptop's first run. Runs before analytics and the

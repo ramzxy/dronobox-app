@@ -23,7 +23,7 @@ import { defineStore } from "pinia";
 import { computed, reactive, ref, watch } from "vue";
 import { DRONOBOX_KIT, type SpinDirection } from "@/dronobox/kit";
 
-export const DRONOBOX_STEPS = ["gyro", "align", "level", "safety", "motors", "radio", "done"] as const;
+export const DRONOBOX_STEPS = ["meet", "gyro", "align", "level", "motors", "safety", "spin", "radio", "done"] as const;
 export type DronoBoxStep = (typeof DRONOBOX_STEPS)[number];
 
 export interface MotorCheck {
@@ -69,8 +69,8 @@ export const useDronoBoxStore = defineStore("dronobox", () => {
     const saved = readSession<SavedProgress>(PROGRESS_KEY);
 
     const instructorUnlocked = ref(readSession<boolean>(INSTRUCTOR_KEY) === true);
-    const step = ref<DronoBoxStep>(saved && DRONOBOX_STEPS.includes(saved.step) ? saved.step : "gyro");
-    const completed = ref<DronoBoxStep[]>(saved?.completed ?? []);
+    const step = ref<DronoBoxStep>(saved && DRONOBOX_STEPS.includes(saved.step) ? saved.step : "meet");
+    const completed = ref<DronoBoxStep[]>((saved?.completed ?? []).filter((step) => DRONOBOX_STEPS.includes(step)));
     const motors = reactive<Record<number, MotorCheck>>({ ...emptyMotorChecks(), ...saved?.motors });
 
     /** True while participants are using the app: only the guided flow is shown. */
@@ -124,7 +124,7 @@ export const useDronoBoxStore = defineStore("dronobox", () => {
     }
 
     function resetProgress(): void {
-        step.value = "gyro";
+        step.value = "meet";
         completed.value = [];
         Object.assign(motors, emptyMotorChecks());
     }
