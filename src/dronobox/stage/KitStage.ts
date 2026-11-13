@@ -69,13 +69,21 @@ export type ShotName =
     | "spin"
     | "radio"
     | "done"
-    | "gyroGame";
+    | "gyroGame"
+    | "axes";
 
 export type KitPart = "frame" | "fc" | "pdb" | "esc" | "motor" | "prop" | "receiver" | "battery";
 
 export const KIT_PARTS: readonly KitPart[] = ["frame", "fc", "pdb", "esc", "motor", "prop", "receiver", "battery"];
 
+export interface AxisDemo {
+    axis: "roll" | "pitch" | "yaw";
+    angle: number;
+}
+
 export interface StageInput {
+    axisDemo: AxisDemo | null;
+    assembly: number;
     shot: ShotName;
     /** Live attitude in degrees, as Betaflight reports it. */
     attitude: { roll: number; pitch: number; heading: number };
@@ -123,6 +131,13 @@ interface Shot {
 }
 
 const SHOTS: Record<ShotName, Shot> = {
+    axes: {
+        orbit: { azimuth: 22, elevation: 26, distance: 1120 },
+        target: [0, 15, 0],
+        explode: {},
+        overlays: [],
+        motion: "rest",
+    },
     hero: {
         orbit: { azimuth: 38, elevation: 24, distance: 980 },
         target: [0, 10, 0],
@@ -135,7 +150,7 @@ const SHOTS: Record<ShotName, Shot> = {
         target: [0, 30, 0],
         explode: { lid: 1, fc: 1, pdb: 1, esc: 1, motor: 1, arm: 1, receiver: 1, battery: 1 },
         overlays: ["labels"],
-        motion: "float",
+        motion: "rest",
     },
     gyro: {
         orbit: { azimuth: 0, elevation: 32, distance: 400 },
@@ -300,8 +315,23 @@ interface MotorSlot {
 export class KitStage {
     readonly renderer: THREE.WebGLRenderer;
     private readonly scene = new THREE.Scene();
+    private readonly environmentTarget: THREE.WebGLRenderTarget;
     private readonly camera = new THREE.PerspectiveCamera(32, 1, 5, 6000);
     private readonly clock = new THREE.Clock();
+    private running = false;
+    private settleRemaining = 0;
+    private lastFrame = 0;
+    private reducedMotion = false;
+    private readonly sharedGeometries: Set<THREE.BufferGeometry>;
+    private readonly axisGuide = createGimbal(215);
+    private readonly axisShaft = new THREE.Mesh(
+        new THREE.CylinderGeometry(1.3, 1.3, 490, 8),
+        glow(KIT_COLOURS.accent, 0.8),
+    );
+    private readonly scratchBase = new THREE.Vector3();
+    private readonly scratchAcross = new THREE.Vector3();
+    private readonly scratchEsc = new THREE.Vector3();
+    private readonly scratchMotor = new THREE.Vector3();
     private readonly cameraPos = orbitPosition(SHOTS.hero, new THREE.Vector3());
     private readonly cameraTarget = new THREE.Vector3(...SHOTS.hero.target);
 
@@ -333,6 +363,8 @@ export class KitStage {
 
     private input: StageInput = {
         shot: "hero",
+        axisDemo: null,
+        assembly: 1,
         attitude: { roll: 0, pitch: 0, heading: 0 },
         sticks: null,
         spinningMotor: null,
@@ -385,6 +417,7 @@ export class KitStage {
         private readonly canvas: HTMLCanvasElement,
         geometries: KitGeometries,
     ) {
+        this.sharedGeometries = new Set(Object.values(geometries));
         this.renderer = new THREE.WebGLRenderer({
             canvas,
             antialias: true,
@@ -398,7 +431,10 @@ export class KitStage {
         this.renderer.setClearColor(0x000000, 0);
 
         const pmrem = new THREE.PMREMGenerator(this.renderer);
-        this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+        const room = new RoomEnvironment();
+        this.environmentTarget = pmrem.fromScene(room, 0.04);
+        this.scene.environment = this.environmentTarget.texture;
+        room.dispose();
         pmrem.dispose();
 
         const key = new THREE.DirectionalLight(0xffffff, 1.6);
@@ -421,6 +457,8 @@ export class KitStage {
         this.buildElectronics();
         this.buildOverlays();
         this.buildShadow();
+        this.scene.add(this.axisGuide.group, this.axisShaft);
+        this.axisGuide.group.visible = this.axisShaft.visible = false;
         this.camera.position.copy(this.cameraPos);
     }
 
@@ -718,6 +756,7 @@ export class KitStage {
     update(input: Partial<StageInput>): void {
         const previousShot = this.input.shot;
         this.input = { ...this.input, ...input };
+        this.wake();
         if (input.shot && input.shot !== previousShot) {
             // A new lesson starts from a level, untilted drone facing the camera's way.
             this.headingZero = null;
@@ -731,6 +770,7 @@ export class KitStage {
 
     /** Dragging orbits the camera around the drone, in any direction. */
     drag(dx: number, dy: number): void {
+        this.wake();
         this.dragging = true;
         this.orbitVelocity.az = -dx * 0.35;
         this.orbitVelocity.el = dy * 0.25;
@@ -740,10 +780,12 @@ export class KitStage {
 
     endDrag(): void {
         this.dragging = false;
+        this.wake();
     }
 
     /** Wheel or pinch: positive zooms out. */
     zoom(delta: number): void {
+        this.wake();
         this.orbitZoom = THREE.MathUtils.clamp(this.orbitZoom * Math.exp(delta * 0.0012), 0.5, 1.7);
     }
 
@@ -757,52 +799,107 @@ export class KitStage {
     }
 
     resize(width: number, height: number): void {
+        if (width <= 0 || height <= 0) return;
+        // Bound fill rate on large / high-DPI workshop displays.
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2, Math.sqrt(1_600_000 / (width * height))));
         this.renderer.setSize(width, height, false);
         this.camera.aspect = width / Math.max(height, 1);
         // Keep the drone filling narrow (portrait) stages too.
         this.camera.fov = this.camera.aspect < 1 ? 32 / Math.max(this.camera.aspect, 0.55) : 32;
         this.camera.updateProjectionMatrix();
+        this.wake();
     }
 
+    resetView(): void {
+        this.wake();
+        this.orbitAzimuth = this.orbitElevation = 0;
+        this.orbitZoom = 1;
+        this.orbitVelocity = { az: 0, el: 0 };
+        this.dragging = false;
+    }
+
+    setReducedMotion(value: boolean): void {
+        this.reducedMotion = value;
+        this.wake();
+        this.orbitVelocity = { az: 0, el: 0 };
+    }
+
+    private wake(): void {
+        this.settleRemaining = 2.4;
+        if (this.running && !this.disposed && !this.frameId) {
+            this.clock.start();
+            this.lastFrame = 0;
+            this.frameId = requestAnimationFrame(this.tick);
+        }
+    }
+
+    private readonly tick = (now: number): void => {
+        this.frameId = 0;
+        if (!this.running || this.disposed) return;
+        // Cap fast displays; settled explanations do no GPU work until input changes.
+        if (now - this.lastFrame >= 1000 / 60 - 1) {
+            this.lastFrame = now;
+            const dt = Math.min(this.clock.getDelta(), 0.1);
+            this.frame(dt);
+            this.settleRemaining -= dt;
+        }
+        const continuous =
+            !this.reducedMotion &&
+            (["hero", "done", "radio"].includes(this.input.shot) ||
+                this.input.spinningMotor !== null ||
+                (this.input.shot === "sandbox" && this.input.sandbox?.flying));
+        if (continuous || this.dragging || this.settleRemaining > 0) {
+            this.frameId = requestAnimationFrame(this.tick);
+        }
+    };
+
     start(): void {
-        const loop = () => {
-            if (this.disposed) {
-                return;
-            }
-            this.frameId = requestAnimationFrame(loop);
-            // Capped so a tab coming back from the background eases in rather than jumping.
-            this.frame(Math.min(this.clock.getDelta(), 0.1));
-        };
-        loop();
+        if (this.running || this.disposed) return;
+        this.running = true;
+        this.wake();
+    }
+
+    stop(): void {
+        this.running = false;
+        cancelAnimationFrame(this.frameId);
+        this.frameId = 0;
+        this.clock.stop();
     }
 
     dispose(): void {
+        if (this.disposed) return;
         this.disposed = true;
-        cancelAnimationFrame(this.frameId);
+        this.stop();
+        const geometries = new Set<THREE.BufferGeometry>();
+        const materials = new Set<THREE.Material>();
+        const textures = new Set<THREE.Texture>();
         this.scene.traverse((o) => {
             if (o instanceof THREE.Mesh) {
-                o.geometry.dispose();
-                const materials = Array.isArray(o.material) ? o.material : [o.material];
-                for (const m of materials) {
-                    (m as THREE.Material & { map?: THREE.Texture | null }).map?.dispose();
-                    m.dispose();
+                if (!this.sharedGeometries.has(o.geometry)) geometries.add(o.geometry);
+                for (const material of Array.isArray(o.material) ? o.material : [o.material]) {
+                    materials.add(material);
+                    const map = (material as THREE.Material & { map?: THREE.Texture | null }).map;
+                    if (map) textures.add(map);
                 }
             }
         });
-        this.scene.environment?.dispose();
+        geometries.forEach((geometry) => geometry.dispose());
+        materials.forEach((material) => material.dispose());
+        textures.forEach((texture) => texture.dispose());
+        this.environmentTarget.dispose();
         this.renderer.dispose();
     }
 
     // --- per frame --------------------------------------------------------------------------
 
     private frame(dt: number): void {
-        this.time += dt;
+        if (!this.reducedMotion) this.time += dt;
         const shot = SHOTS[this.input.shot];
 
         // A flick keeps turning for a moment after the finger lets go.
-        if (!this.dragging) {
-            this.orbitAzimuth += this.orbitVelocity.az;
-            this.orbitElevation += this.orbitVelocity.el;
+        if (!this.dragging && !this.reducedMotion) {
+            this.orbitAzimuth += this.orbitVelocity.az * dt * 60;
+            this.orbitElevation += this.orbitVelocity.el * dt * 60;
             const fade = Math.exp(-6 * dt);
             this.orbitVelocity.az *= fade;
             this.orbitVelocity.el *= fade;
@@ -821,7 +918,7 @@ export class KitStage {
             this.cameraPos,
         );
         this.cameraTarget.set(...shot.target);
-        const smooth = this.dragging ? 0.08 : 0.7;
+        const smooth = this.reducedMotion ? 0.001 : this.dragging ? 0.08 : 0.48;
         this.camera.position.set(
             smoothDamp(this.camera.position.x, this.cameraPos.x, this.spring("cx"), smooth, dt),
             smoothDamp(this.camera.position.y, this.cameraPos.y, this.spring("cy"), smooth, dt),
@@ -829,9 +926,9 @@ export class KitStage {
         );
         const look = (this.camera.userData.look as THREE.Vector3 | undefined) ?? this.cameraTarget.clone();
         look.set(
-            smoothDamp(look.x, this.cameraTarget.x, this.spring("lx"), 0.7, dt),
-            smoothDamp(look.y, this.cameraTarget.y, this.spring("ly"), 0.7, dt),
-            smoothDamp(look.z, this.cameraTarget.z, this.spring("lz"), 0.7, dt),
+            smoothDamp(look.x, this.cameraTarget.x, this.spring("lx"), smooth, dt),
+            smoothDamp(look.y, this.cameraTarget.y, this.spring("ly"), smooth, dt),
+            smoothDamp(look.z, this.cameraTarget.z, this.spring("lz"), smooth, dt),
         );
         this.camera.userData.look = look;
         this.camera.lookAt(look);
@@ -850,9 +947,9 @@ export class KitStage {
         for (const key of Object.keys(this.explode) as ExplodeKey[]) {
             this.explode[key] = smoothDamp(
                 this.explode[key],
-                shot.explode[key] ?? 0,
+                (shot.explode[key] ?? 0) * (this.input.shot === "meet" ? this.input.assembly : 1),
                 this.spring(`e-${key}`),
-                0.45,
+                this.reducedMotion ? 0.001 : 0.38,
                 dt,
             );
         }
@@ -879,10 +976,9 @@ export class KitStage {
                 .copy(out)
                 .multiplyScalar((EXPLODE_OUT.esc ?? 0) * amount.esc + (EXPLODE_OUT.arm ?? 0) * amount.arm * 0.5);
             slot.esc.position.y = EXPLODE_LIFT.esc * amount.esc;
-            const base = new THREE.Vector3(-MOTOR_MOUNT.offset, MOTOR_MOUNT.top, -MOTOR_MOUNT.offset).applyAxisAngle(
-                new THREE.Vector3(0, 1, 0),
-                slot.arm.rotation.y,
-            );
+            const base = this.scratchBase
+                .set(-MOTOR_MOUNT.offset, MOTOR_MOUNT.top, -MOTOR_MOUNT.offset)
+                .applyAxisAngle(Y_AXIS, slot.arm.rotation.y);
             slot.motorHolder.position
                 .copy(base)
                 .addScaledVector(
@@ -893,20 +989,21 @@ export class KitStage {
 
             // Phase wires run from the ESC's outer end to the foot of its motor.
             const wiresShown = (this.overlayOpacity.get("wires") ?? 0) > 0.02;
-            const across = new THREE.Vector3(-out.z, 0, out.x);
+            const across = this.scratchAcross.set(-out.z, 0, out.x);
             slot.wires.forEach((wire, i) => {
                 wire.visible = wiresShown;
                 if (!wiresShown) {
                     return;
                 }
                 const side = (i - 1) * 3.2;
-                const escEnd = new THREE.Vector3(ESC_MOUNT.x, ESC_MOUNT.top + 2.6, ESC_MOUNT.z)
+                const escEnd = this.scratchEsc
+                    .set(ESC_MOUNT.x, ESC_MOUNT.top + 2.6, ESC_MOUNT.z)
                     .applyAxisAngle(Y_AXIS, slot.angle)
                     .add(slot.esc.position)
                     .addScaledVector(out, 14)
                     .addScaledVector(across, side);
-                const motorFoot = slot.motorHolder.position
-                    .clone()
+                const motorFoot = this.scratchMotor
+                    .copy(slot.motorHolder.position)
                     .addScaledVector(out, -15)
                     .addScaledVector(across, side)
                     .setY(slot.motorHolder.position.y + 3);
@@ -933,7 +1030,12 @@ export class KitStage {
         let yawRate = 0;
         const input = this.input;
 
-        if (shot.motion === "live") {
+        const demo = input.shot === "axes" ? input.axisDemo : null;
+        if (demo) {
+            targetRoll = demo.axis === "roll" ? -demo.angle * DEG : 0;
+            targetPitch = demo.axis === "pitch" ? -demo.angle * DEG : 0;
+            this.yaw = angleApproach(this.yaw, demo.axis === "yaw" ? -demo.angle * DEG : 0, 18, dt);
+        } else if (shot.motion === "live") {
             const { roll, pitch, heading } = input.attitude;
             this.headingZero ??= heading;
             targetRoll = -roll * DEG;
@@ -947,7 +1049,7 @@ export class KitStage {
             targetPitch = -s.pitch * 28 * DEG;
             yawRate = -s.yaw * 140 * DEG;
             targetAltitude = Math.max(0, s.throttle - 0.08) * 120;
-        } else if (shot.motion === "float") {
+        } else if (shot.motion === "float" && !this.reducedMotion) {
             // Resting in the air, breathing slightly: alive without spinning.
             targetAltitude = 12 + Math.sin(this.time * 1.1) * 3;
             targetRoll = Math.sin(this.time * 0.7) * 1.2 * DEG;
@@ -955,7 +1057,7 @@ export class KitStage {
         } else if (shot.motion === "hover") {
             targetAltitude = 70 + Math.sin(this.time * 1.4) * 6;
             targetRoll = Math.sin(this.time * 0.9) * 1.5 * DEG;
-            targetPitch = Math.cos(this.time * 0.7) * 1.5 * DEG;
+            targetPitch = this.reducedMotion ? 0 : Math.cos(this.time * 0.7) * 1.5 * DEG;
         } else if (shot.motion === "sandbox") {
             const result = this.sandboxStep(dt);
             targetRoll = result.roll;
@@ -970,12 +1072,12 @@ export class KitStage {
         } else if (shot.motion === "sandbox") {
             this.stickYaw += yawRate * dt;
             this.yaw = angleApproach(this.yaw, this.stickYaw, 10, dt);
-        } else if (shot.motion !== "live") {
+        } else if (shot.motion !== "live" && !demo) {
             this.stickYaw = 0;
             this.yaw = angleApproach(this.yaw, 0, 3, dt);
         }
 
-        const rate = shot.motion === "live" ? 14 : 4;
+        const rate = demo || this.reducedMotion ? 25 : shot.motion === "live" ? 14 : 4;
         this.roll = approach(this.roll, targetRoll, rate, dt);
         this.pitch = approach(this.pitch, targetPitch, rate, dt);
         this.altitude = approach(this.altitude, targetAltitude, shot.motion === "sandbox" ? 2.2 : 3, dt);
@@ -986,11 +1088,21 @@ export class KitStage {
 
         // The ghost follows the drone's heading (only roll and pitch are being matched).
         const ghost = input.ghost;
-        const ghostTarget = this.input.shot === "gyroGame" && ghost ? (input.ghostMatched ? 0.36 : 0.24) : 0;
+        const ghostTarget = demo
+            ? 0.1
+            : this.input.shot === "gyroGame" && ghost
+              ? input.ghostMatched
+                  ? 0.36
+                  : 0.24
+              : 0;
         this.ghostMaterial.opacity = approach(this.ghostMaterial.opacity, ghostTarget, 6, dt);
         this.ghostMaterial.color.setHex(input.ghostMatched ? KIT_COLOURS.axisPitch : KIT_COLOURS.accent);
         this.ghostOuter.visible = this.ghostMaterial.opacity > 0.01;
-        if (ghost) {
+        if (demo) {
+            this.ghostOuter.rotation.set(0, 0, 0);
+            this.ghostOuter.position.y = 0;
+            this.ghostInner.rotation.set(0, 0, 0);
+        } else if (ghost) {
             this.ghostOuter.rotation.y = this.yaw;
             this.ghostOuter.position.y = this.altitude;
             this.ghostInner.rotation.x = smoothDamp(
@@ -1028,11 +1140,11 @@ export class KitStage {
             this.sandboxFlying = flying;
             this.sandboxClock = 0;
         }
-        this.sandboxClock += dt;
+        if (!this.reducedMotion) this.sandboxClock += dt;
         if (!sandbox || !flying) {
             return { roll: 0, pitch: 0, altitude: 0, yawRate: 0 };
         }
-        const t = this.sandboxClock;
+        const t = this.reducedMotion ? 2.3 : this.sandboxClock;
         const outcome = sandboxOutcome(sandbox.dirs);
         if (outcome === "stable") {
             return {
@@ -1048,7 +1160,7 @@ export class KitStage {
                 roll: Math.sin(t * 5) * 4 * DEG,
                 pitch: Math.cos(t * 4.3) * 4 * DEG,
                 altitude: 70,
-                yawRate: sign * Math.min(9, 1.5 + t * 3),
+                yawRate: this.reducedMotion ? 0 : sign * Math.min(9, 1.5 + t * 3),
             };
         }
         // Unstable: a growing wobble, then it rolls over and drops onto its back.
@@ -1087,12 +1199,12 @@ export class KitStage {
             }
             slot.spinSpeed = approach(slot.spinSpeed, target, target > slot.spinSpeed ? 2.5 : 1.6, dt);
             const sign = direction === "cw" ? -1 : 1; // positive rotation.y is counter-clockwise from above
-            slot.spinAngle += sign * slot.spinSpeed * dt;
+            if (!this.reducedMotion) slot.spinAngle += sign * slot.spinSpeed * dt;
             slot.motor.rotor.rotation.y = slot.spinAngle;
             const shiver = realSpin && !revealed ? Math.sin(this.time * 90) * 0.6 : 0;
             slot.motor.group.position.x = shiver;
 
-            const fast = slot.spinSpeed > 25;
+            const fast = slot.spinSpeed > 25 || (this.reducedMotion && slot.spinSpeed > 0.1);
             const blurMaterial = slot.blur.material as THREE.MeshBasicMaterial;
             blurMaterial.opacity = approach(blurMaterial.opacity, fast ? 0.16 * this.propsShown : 0, 6, dt);
             slot.prop.visible = this.propsShown > 0.02 && !fast;
@@ -1118,6 +1230,21 @@ export class KitStage {
     }
 
     private updateOverlays(shot: Shot, dt: number): void {
+        const demo = this.input.shot === "axes" ? this.input.axisDemo : null;
+        this.axisGuide.group.visible = this.axisShaft.visible = !!demo;
+        if (demo) {
+            for (const axis of ["roll", "pitch", "yaw"] as const) {
+                (this.axisGuide[axis].material as THREE.MeshBasicMaterial).opacity = demo.axis === axis ? 0.8 : 0.08;
+            }
+            this.axisShaft.rotation.set(
+                demo.axis === "roll" ? Math.PI / 2 : 0,
+                0,
+                demo.axis === "pitch" ? Math.PI / 2 : 0,
+            );
+            (this.axisShaft.material as THREE.MeshBasicMaterial).color.setHex(
+                KIT_COLOURS[demo.axis === "roll" ? "axisRoll" : demo.axis === "pitch" ? "axisPitch" : "axisYaw"],
+            );
+        }
         for (const [key, value] of this.overlayOpacity) {
             this.overlayOpacity.set(key, approach(value, shot.overlays.includes(key) ? 1 : 0, 4, dt));
         }
@@ -1179,7 +1306,7 @@ export class KitStage {
     }
 
     private updateHighlight(dt: number): void {
-        const pulse = 0.35 + Math.sin(this.time * 3) * 0.15;
+        const pulse = 0.45;
         for (const [part, list] of this.materials) {
             const target = this.input.highlight === part ? pulse : 0;
             for (const m of list) {
@@ -1192,7 +1319,7 @@ export class KitStage {
         if (!this.onAnchors) {
             return;
         }
-        const show = (this.overlayOpacity.get("labels") ?? 0) > 0.5;
+        const show = (this.overlayOpacity.get("labels") ?? 0) > 0.5 && this.input.assembly > 0.65;
         const width = this.renderer.domElement.clientWidth;
         const height = this.renderer.domElement.clientHeight;
         const anchors: LabelAnchor[] = [];

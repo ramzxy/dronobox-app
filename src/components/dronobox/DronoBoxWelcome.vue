@@ -43,13 +43,6 @@
                             <span>{{ $t("dronobox:welcomeStep2Help") }}</span>
                         </div>
                     </li>
-                    <li>
-                        <span class="dronobox-welcome__num">3</span>
-                        <div>
-                            <strong>{{ $t("dronobox:welcomeStep3") }}</strong>
-                            <span>{{ $t("dronobox:welcomeStep3Help") }}</span>
-                        </div>
-                    </li>
                 </ol>
 
                 <div class="dronobox-welcome__connect">
@@ -86,7 +79,23 @@
             </p>
         </section>
 
-        <KitStageView class="dronobox-welcome__stage" :input="{ shot: 'hero' }" draggable />
+        <KitStageView
+            class="dronobox-welcome__stage"
+            :input="{ shot: lookInside ? 'meet' : 'hero', assembly: lookInside ? 1 : 0 }"
+            draggable
+        >
+            <div class="dronobox-welcome__inspect" @pointerdown.stop>
+                <span>{{ $t("dronobox:welcomeModel") }}</span>
+                <UButton
+                    color="neutral"
+                    variant="outline"
+                    :icon="lookInside ? 'i-lucide-box' : 'i-lucide-layers-3'"
+                    :aria-pressed="lookInside"
+                    :label="$t(lookInside ? 'dronobox:welcomeAssemble' : 'dronobox:welcomeLookInside')"
+                    @click="lookInside = !lookInside"
+                />
+            </div>
+        </KitStageView>
         <InstructorDialog v-model:open="instructorOpen" />
     </div>
 </template>
@@ -104,6 +113,7 @@ import InstructorDialog from "./InstructorDialog.vue";
 
 const store = useDronoBoxStore();
 const instructorOpen = ref(false);
+const lookInside = ref(false);
 
 // Walk through the lessons with Betaflight's built-in pretend flight controller. Only in dev
 // builds and for instructors: participants always plug in their real drone.
@@ -152,7 +162,9 @@ function setLanguage(code: string): void {
         display: flex;
         flex-direction: column;
         gap: 2rem;
-        padding: 1.5rem 2rem 1.5rem 2.5rem;
+        padding: 2rem clamp(1.5rem, 3vw, 3rem);
+        background: var(--dronobox-panel);
+        border-right: 1px solid var(--dronobox-line);
     }
     &__top {
         display: flex;
@@ -179,14 +191,15 @@ function setLanguage(code: string): void {
     }
     &__body {
         display: grid;
-        gap: 1.1rem;
+        gap: 1.5rem;
         margin: auto 0;
     }
     &__title {
         margin: 0;
-        font-size: clamp(2.3rem, 4.2vw, 3.6rem);
-        font-weight: 800;
-        line-height: 1;
+        font-size: clamp(2.5rem, 4vw, 3.75rem);
+        text-wrap: balance;
+        font-weight: 650;
+        line-height: 1.06;
         letter-spacing: -0.035em;
         color: var(--dronobox-ink);
     }
@@ -259,6 +272,13 @@ function setLanguage(code: string): void {
 
         .sidebar-connect {
             width: 100%;
+
+            .sidebar-connect__label {
+                display: inline;
+            }
+            .sidebar-connect__group {
+                width: 100% !important;
+            }
         }
 
         .sidebar-connect__main {
@@ -306,6 +326,18 @@ function setLanguage(code: string): void {
             cursor: pointer;
         }
     }
+    &__inspect {
+        position: absolute;
+        inset: auto 1.5rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        span {
+            color: var(--dronobox-ink-soft);
+            font-size: 0.8rem;
+        }
+    }
     &__stage {
         min-height: 26rem;
     }
@@ -315,7 +347,7 @@ function setLanguage(code: string): void {
 
         &__stage {
             order: -1;
-            height: 38vh;
+            height: 38svh;
             min-height: 16rem;
         }
         &__copy {

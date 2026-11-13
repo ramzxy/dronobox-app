@@ -24,6 +24,8 @@
                         @click="store.goTo(name)"
                     >
                         <span class="dbx__seg-fill"></span>
+                        <UIcon v-if="store.isCompleted(name) && store.step !== name" name="i-lucide-check" />
+                        <span v-else class="dbx__seg-number">{{ index + 1 }}</span>
                     </button>
                 </nav>
                 <div class="dbx__bar-actions">
@@ -67,7 +69,7 @@
             </header>
 
             <div class="dbx__main">
-                <section class="dbx__lesson" aria-live="polite">
+                <section ref="lesson" class="dbx__lesson">
                     <p v-if="loadFailed" class="dbx__note is-bad">{{ $t("dronobox:loadFailed") }}</p>
                     <Transition name="dbx-swap" mode="out-in">
                         <div :key="`${store.step}-${motorPhase}`" class="dbx__lesson-inner">
@@ -75,6 +77,21 @@
                             <template v-if="store.step === 'meet'">
                                 <h1>{{ $t("dronobox:meetTitle") }}</h1>
                                 <p class="dbx__lead">{{ $t("dronobox:meetLead") }}</p>
+                                <div class="dbx__assembly">
+                                    <label for="dbx-assembly">{{ $t("dronobox:assemblyLabel") }}</label>
+                                    <input
+                                        id="dbx-assembly"
+                                        v-model.number="assembly"
+                                        type="range"
+                                        min="0"
+                                        max="1"
+                                        step="0.01"
+                                    />
+                                    <div>
+                                        <span>{{ $t("dronobox:assemblyClosed") }}</span
+                                        ><span>{{ $t("dronobox:assemblyOpen") }}</span>
+                                    </div>
+                                </div>
                                 <div class="dbx__parts">
                                     <button
                                         v-for="part in KIT_PARTS"
@@ -82,6 +99,7 @@
                                         type="button"
                                         class="dbx__part"
                                         :class="{ 'is-active': activePart === part, 'is-seen': seenParts.has(part) }"
+                                        :aria-pressed="pickedPart === part"
                                         @click="pickPart(part)"
                                         @mouseenter="hoverPart = part"
                                         @mouseleave="hoverPart = null"
@@ -93,7 +111,6 @@
                                     <strong>{{ $t(`dronobox:${partKey(activePart)}`) }}</strong>
                                     <p>{{ $t(`dronobox:${partKey(activePart)}Fact`) }}</p>
                                 </div>
-                                <p v-else class="dbx__hint">{{ $t("dronobox:meetHint") }}</p>
                                 <footer class="dbx__actions">
                                     <UButton
                                         size="lg"
@@ -108,11 +125,12 @@
                             <template v-else-if="store.step === 'gyro'">
                                 <h1>{{ $t("dronobox:gyroTitle") }}</h1>
                                 <p class="dbx__lead">{{ $t("dronobox:gyroLead") }}</p>
-                                <p class="dbx__task">
+                                <AxisExplorer v-model="axisDemo" />
+                                <p v-if="!axisDemo" class="dbx__task">
                                     <UIcon name="i-lucide-hand" />
                                     <span>{{ $t("dronobox:gyroTask") }}</span>
                                 </p>
-                                <div class="dbx__axes">
+                                <div v-if="!axisDemo" class="dbx__axes">
                                     <div
                                         v-for="axis in axes"
                                         :key="axis.key"
@@ -122,11 +140,11 @@
                                         <span>{{ $t(`dronobox:axis${axis.label}`) }}</span>
                                         <strong>{{ axis.value }}°</strong>
                                         <div class="dbx__axis-bar">
-                                            <i :style="{ width: `${axis.peak}%` }"></i>
+                                            <i :style="{ transform: `scaleX(${axis.peak / 100})` }"></i>
                                         </div>
                                     </div>
                                 </div>
-                                <section class="dbx__game" :class="`is-${game.state}`">
+                                <section v-if="!axisDemo" class="dbx__game" :class="`is-${game.state}`">
                                     <h2>{{ $t("dronobox:gameTitle") }}</h2>
                                     <p v-if="game.state === 'idle'">{{ $t("dronobox:gameLead") }}</p>
                                     <template v-else-if="game.state === 'playing'">
@@ -137,7 +155,7 @@
                                             <strong>{{ $t(`dronobox:game${gamePose.axis}`) }}</strong>
                                         </p>
                                         <div class="dbx__game-meter">
-                                            <i :style="{ width: `${game.hold * 100}%` }"></i>
+                                            <i :style="{ transform: `scaleX(${game.hold})` }"></i>
                                         </div>
                                         <p class="dbx__hint">
                                             {{ game.matched ? $t("dronobox:gameHold") : $t("dronobox:gameMove") }}
@@ -172,14 +190,20 @@
                                     <summary>{{ $t("dronobox:whyTitle") }}</summary>
                                     <p>{{ $t("dronobox:gyroWhy") }}</p>
                                 </details>
-                                <p class="dbx__hint">{{ $t("dronobox:gyroHelp") }}</p>
+                                <p v-if="!axisDemo" class="dbx__hint">{{ $t("dronobox:gyroHelp") }}</p>
                                 <footer class="dbx__actions">
                                     <UButton
                                         size="lg"
                                         trailing-icon="i-lucide-arrow-right"
-                                        :disabled="!gyroDone && !store.canSkip"
-                                        :label="gyroDone ? $t('dronobox:gyroConfirm') : $t('dronobox:gyroWaiting')"
-                                        @click="store.completeAndAdvance('gyro')"
+                                        :disabled="!axisDemo && !gyroDone && !store.canSkip"
+                                        :label="
+                                            axisDemo
+                                                ? $t('dronobox:axisTryReal')
+                                                : gyroDone
+                                                  ? $t('dronobox:gyroConfirm')
+                                                  : $t('dronobox:gyroWaiting')
+                                        "
+                                        @click="axisDemo ? (axisDemo = null) : store.completeAndAdvance('gyro')"
                                     />
                                 </footer>
                             </template>
@@ -258,7 +282,7 @@
                                 </p>
                                 <div class="dbx__still" :class="`is-${stillness.state}`">
                                     <div class="dbx__still-bar">
-                                        <i :style="{ width: `${stillness.progress}%` }"></i>
+                                        <i :style="{ transform: `scaleX(${stillness.progress / 100})` }"></i>
                                     </div>
                                     <span>{{
                                         $t(
@@ -621,9 +645,13 @@
                     class="dbx__stage"
                     :input="stageInput"
                     :highlight="stageHighlight"
+                    @turn="turnAxis"
                     @pick="pickPart"
                     @hover="hoverPart = $event"
                 >
+                    <p v-if="axisDemo && store.step === 'gyro'" class="dbx__stage-caption">
+                        {{ $t("dronobox:axisReference") }}
+                    </p>
                     <dl v-if="showHud" class="dbx__hud">
                         <div class="is-roll">
                             <dt>{{ $t("dronobox:axisRoll") }}</dt>
@@ -648,6 +676,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
 import BaseTab from "./BaseTab.vue";
+import AxisExplorer from "@/components/dronobox/AxisExplorer.vue";
 import MotorMap from "@/components/dronobox/MotorMap.vue";
 import StickCheck from "@/components/dronobox/StickCheck.vue";
 import ArmingStatus from "@/components/dronobox/ArmingStatus.vue";
@@ -659,13 +688,29 @@ import { useDialog } from "@/composables/useDialog";
 import { useDronoBoxFc } from "@/composables/dronobox/useDronoBoxFc";
 import { DRONOBOX_STEPS, useDronoBoxStore, type DronoBoxStep } from "@/stores/dronobox";
 import { DRONOBOX_KIT, type SpinDirection } from "@/dronobox/kit";
-import { KIT_PARTS, type KitPart, type ShotName, type StageInput } from "@/dronobox/stage/KitStage";
+import { KIT_PARTS, type KitPart, type ShotName, type StageInput, type AxisDemo } from "@/dronobox/stage/KitStage";
 import { sandboxOutcome } from "@/dronobox/sandbox";
 
 const store = useDronoBoxStore();
 const dialog = useDialog();
 const instructorOpen = ref(false);
 const isDevBuild = import.meta.env.DEV;
+const lesson = ref<HTMLElement | null>(null);
+const assembly = ref(1);
+function scrollLessonToStart(): void {
+    lesson.value?.scrollTo({ top: 0 });
+    if (window.matchMedia("(max-width: 960px)").matches) {
+        document.getElementById("content")?.scrollTo({ top: 0 });
+    }
+}
+const axisDemo = ref<AxisDemo | null>(null);
+function turnAxis(delta: number): void {
+    if (!axisDemo.value) return;
+    axisDemo.value = { ...axisDemo.value, angle: Math.max(-45, Math.min(45, axisDemo.value.angle + delta)) };
+}
+watch(axisDemo, (demo) => {
+    if (demo) stopGame();
+});
 
 const {
     loaded,
@@ -717,6 +762,7 @@ const seenParts = reactive(new Set<KitPart>());
 const activePart = computed(() => hoverPart.value ?? pickedPart.value);
 
 function pickPart(part: KitPart): void {
+    assembly.value = 1;
     pickedPart.value = part;
     seenParts.add(part);
 }
@@ -886,6 +932,7 @@ watch(attitude, (value) => {
 // --- 5. motor lesson: the ESC, then a direction sandbox -------------------------------------
 
 const motorPhase = ref<"esc" | "sandbox">("esc");
+watch(motorPhase, scrollLessonToStart);
 const sandboxDirs = reactive<Record<number, SpinDirection>>(
     Object.fromEntries(DRONOBOX_KIT.motors.map((m) => [m.number, "cw"])) as Record<number, SpinDirection>,
 );
@@ -1017,6 +1064,8 @@ const sticks = computed(() => {
 watch(
     () => store.step,
     (step, previous) => {
+        axisDemo.value = null;
+        scrollLessonToStart();
         if (previous === "spin") {
             stopMotors();
             motorsTestingEnabled.value = false;
@@ -1086,23 +1135,32 @@ const stageHighlight = computed<KitPart | null>(() => {
 });
 
 // Live readouts only where the lesson is about live data.
-const showHud = computed(() => ["gyro", "level", "safety", "spin", "radio", "done"].includes(store.step));
+const showHud = computed(
+    () => !axisDemo.value && ["gyro", "level", "safety", "spin", "radio", "done"].includes(store.step),
+);
 
 const stageInput = computed<Partial<StageInput>>(() => {
     const step = store.step;
     return {
+        axisDemo: step === "gyro" ? axisDemo.value : null,
+        assembly: assembly.value,
         shot:
-            step === "motors" && motorPhase.value === "sandbox"
-                ? "sandbox"
-                : step === "gyro" && game.state === "playing"
-                  ? "gyroGame"
-                  : SHOT_FOR_STEP[step],
+            step === "gyro" && axisDemo.value
+                ? "axes"
+                : step === "motors" && motorPhase.value === "sandbox"
+                  ? "sandbox"
+                  : step === "gyro" && game.state === "playing"
+                    ? "gyroGame"
+                    : SHOT_FOR_STEP[step],
         ghost:
             step === "gyro" && game.state === "playing"
                 ? { roll: gamePose.value.roll, pitch: gamePose.value.pitch }
                 : null,
         ghostMatched: game.matched,
-        attitude: { ...attitude.value },
+        attitude:
+            (step === "gyro" && !axisDemo.value) || step === "level"
+                ? { ...attitude.value }
+                : { roll: 0, pitch: 0, heading: 0 },
         sticks: step === "radio" ? sticks.value : null,
         spinningMotor: step === "spin" ? spinningMotor.value : null,
         selectedMotor: step === "spin" ? selectedMotor.value : null,
@@ -1245,11 +1303,15 @@ onBeforeUnmount(() => {
     &__seg {
         position: relative;
         flex: 1;
-        height: 0.55rem;
+        height: 2.5rem;
+        min-width: 1.5rem;
+        display: grid;
+        place-items: center;
+        color: var(--dronobox-ink-soft);
         padding: 0;
         border: 0;
-        border-radius: 999px;
-        background: var(--dronobox-line);
+        border-radius: 0.5rem;
+        background: transparent;
         cursor: pointer;
         overflow: hidden;
 
@@ -1263,12 +1325,24 @@ onBeforeUnmount(() => {
     }
     &__seg-fill {
         position: absolute;
-        inset: 0;
+        inset: auto 0.25rem 0;
+        height: 2px;
         border-radius: inherit;
         background: var(--dronobox-accent);
         transform: scaleX(0);
         transform-origin: left;
         transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    &__seg-number {
+        font-size: 0.8rem;
+        font-variant-numeric: tabular-nums;
+    }
+    &__seg.is-active {
+        color: var(--dronobox-ink);
+        background: var(--dronobox-panel-raised);
+    }
+    &__seg.is-done {
+        color: var(--dronobox-accent);
     }
     &__seg.is-done &__seg-fill {
         transform: scaleX(1);
@@ -1286,7 +1360,7 @@ onBeforeUnmount(() => {
 
     &__main {
         display: grid;
-        grid-template-columns: minmax(22rem, 30rem) minmax(0, 1fr);
+        grid-template-columns: minmax(23rem, 32rem) minmax(0, 1fr);
         flex: 1;
         min-height: 0;
     }
@@ -1294,19 +1368,22 @@ onBeforeUnmount(() => {
         display: flex;
         flex-direction: column;
         gap: 1rem;
-        padding: 2rem 1.5rem 2rem 2rem;
+        padding: 2rem clamp(1.25rem, 2.5vw, 2.5rem);
+        background: var(--dronobox-panel);
+        border-right: 1px solid var(--dronobox-line);
         overflow-y: auto;
     }
     &__lesson-inner {
         display: grid;
-        gap: 1rem;
+        gap: 1.25rem;
         align-content: start;
 
         h1 {
             margin: 0;
             font-size: clamp(1.7rem, 2.6vw, 2.35rem);
-            font-weight: 800;
-            line-height: 1.08;
+            font-weight: 650;
+            text-wrap: balance;
+            line-height: 1.12;
             letter-spacing: -0.025em;
             color: var(--dronobox-ink);
         }
@@ -1392,7 +1469,7 @@ onBeforeUnmount(() => {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        justify-content: flex-end;
+        justify-content: flex-start;
         gap: 0.6rem;
         margin-top: 0.5rem;
 
@@ -1414,7 +1491,8 @@ onBeforeUnmount(() => {
         gap: 0.15rem 1rem;
     }
     &__part {
-        padding: 0.45rem 0.6rem;
+        padding: 0.65rem 0.6rem;
+        min-height: 2.75rem;
         margin: 0 -0.6rem;
         border: 0;
         border-radius: 0.45rem;
@@ -1451,6 +1529,37 @@ onBeforeUnmount(() => {
         }
     }
 
+    &__assembly {
+        display: grid;
+        gap: 0.5rem;
+        padding-block: 0.5rem 1rem;
+        border-bottom: 1px solid var(--dronobox-line);
+        label {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        input {
+            width: 100%;
+            min-height: 1.5rem;
+            accent-color: var(--dronobox-accent);
+            cursor: ew-resize;
+        }
+        div {
+            display: flex;
+            justify-content: space-between;
+            color: var(--dronobox-ink-soft);
+            font-size: 0.75rem;
+        }
+    }
+    &__stage-caption {
+        position: absolute;
+        inset: auto 1.5rem 1.5rem;
+        margin: 0;
+        color: var(--dronobox-ink-soft);
+        text-align: center;
+        font-size: 0.85rem;
+        pointer-events: none;
+    }
     // gyro
     &__axes {
         display: grid;
@@ -1492,7 +1601,9 @@ onBeforeUnmount(() => {
             display: block;
             height: 100%;
             background: var(--axis);
-            transition: width 0.2s ease;
+            width: 100%;
+            transform-origin: left;
+            transition: transform 0.2s ease;
         }
     }
 
@@ -1530,6 +1641,8 @@ onBeforeUnmount(() => {
             display: block;
             height: 100%;
             background: var(--dronobox-ok);
+            width: 100%;
+            transform-origin: left;
         }
     }
     &__game-score {
@@ -1586,7 +1699,9 @@ onBeforeUnmount(() => {
             display: block;
             height: 100%;
             background: var(--dronobox-ok);
-            transition: width 0.15s linear;
+            width: 100%;
+            transform-origin: left;
+            transition: transform 0.15s linear;
         }
     }
 
@@ -1764,8 +1879,9 @@ onBeforeUnmount(() => {
     }
     &__hud {
         position: absolute;
-        left: 1.25rem;
-        bottom: 1.25rem;
+        left: 1.5rem;
+        bottom: 1.5rem;
+        pointer-events: none;
         display: flex;
         gap: 0.4rem;
         margin: 0;
@@ -1775,8 +1891,8 @@ onBeforeUnmount(() => {
             gap: 0.05rem;
             min-width: 4.6rem;
             padding: 0.4rem 0.65rem;
-            border: 1px solid var(--dronobox-line);
-            border-radius: 0.55rem;
+            border: 0;
+            border-radius: 0;
             background: var(--dronobox-chip);
         }
         dt {
@@ -1818,7 +1934,12 @@ onBeforeUnmount(() => {
         &__stage {
             order: -1;
             flex: none;
-            height: 42vh;
+            height: clamp(16rem, 34svh, 26rem);
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: var(--dronobox-bg-1);
+            border-bottom: 1px solid var(--dronobox-line);
         }
         &__lesson {
             padding: 1.25rem 1rem 2rem;
@@ -1833,16 +1954,16 @@ onBeforeUnmount(() => {
 .dbx-swap-enter-active,
 .dbx-swap-leave-active {
     transition:
-        opacity 0.28s ease,
-        transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+        opacity 0.16s ease,
+        transform 0.16s var(--dronobox-ease-out);
 }
 .dbx-swap-enter-from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(6px);
 }
 .dbx-swap-leave-to {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-4px);
 }
 @media (prefers-reduced-motion: reduce) {
     .dbx-swap-enter-active,

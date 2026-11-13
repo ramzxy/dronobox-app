@@ -6,19 +6,19 @@
         "message": "Set up your drone"
     },
     "subtitle": {
-        "message": "Seven short steps from a box of parts to a drone that is ready to fly."
+        "message": "Check your drone before its first flight."
     },
     "stepsLabel": {
         "message": "Setup steps"
     },
     "loadFailed": {
-        "message": "Could not read the flight controller. Unplug the USB cable, plug it back in and connect again."
+        "message": "Couldn't read the flight controller. Reconnect the USB cable and try again."
     },
     "next": {
         "message": "Next"
     },
     "whyTitle": {
-        "message": "Why?"
+        "message": "How it works"
     },
     "stepGyro": {
         "message": "Gyroscope"
@@ -45,37 +45,37 @@
         "message": "The gyroscope"
     },
     "gyroLead": {
-        "message": "The flight controller is the drone's brain. On it sits a tiny chip called a gyroscope that feels every rotation."
+        "message": "The gyroscope measures how fast the drone rotates. The flight controller uses this to keep it steady."
     },
     "gyroTask": {
-        "message": "Pick up your drone and tilt it slowly in every direction. The drone on screen copies you, and the bars fill up."
+        "message": "Pick up your drone and tilt it slowly. Watch the model follow your movements."
     },
     "gyroWhy": {
-        "message": "A drone can't balance on its own. Thousands of times every second the flight controller reads the gyro, notices it is starting to tip, and changes the motor speeds to catch itself. No human pilot is that fast."
+        "message": "When the drone starts to tip, the flight controller adjusts the motor speeds to correct it. The gyro measures the rotation so the controller can respond."
     },
     "gyroHelp": {
-        "message": "Nothing moves on screen? Check the USB cable is pushed in all the way, then ask a DroneTeam member."
+        "message": "Model not moving? Check the USB cable. If it still doesn't respond, ask a DroneTeam member."
     },
     "gyroWaiting": {
-        "message": "Keep tilting…"
+        "message": "Tilt your drone to continue"
     },
     "gyroConfirm": {
-        "message": "It follows me"
+        "message": "Movement checked"
     },
     "alignTitle": {
-        "message": "Tell it which way is forward"
+        "message": "Set the board direction"
     },
     "alignLead": {
-        "message": "The flight controller doesn't know how it was mounted. In the DronoBox it sits turned 270° clockwise, so we have to tell it."
+        "message": "The DronoBox flight controller is mounted at 270° clockwise. Set this here so Betaflight reads its movements correctly."
     },
     "alignLook": {
-        "message": "Find the small white arrow on the flight controller and the arrow on the floor of the body. They should point the same way."
+        "message": "Find the white arrow on the flight controller and compare it with the arrow inside the frame."
     },
     "alignCurrent": {
-        "message": "Now"
+        "message": "Current setting"
     },
     "alignNeeded": {
-        "message": "DronoBox needs"
+        "message": "Kit setting"
     },
     "alignDefault": {
         "message": "Default"
@@ -84,52 +84,52 @@
         "message": "Set CW 270° and save"
     },
     "alignOk": {
-        "message": "The flight controller now knows how it is mounted."
+        "message": "Board direction set to CW 270°."
     },
     "alignCheck": {
-        "message": "Tip the nose of your drone down. The drone on screen should tip its nose down too, not sideways."
+        "message": "To check it, go back to Gyroscope and tip the nose down. The model should follow."
     },
     "alignConfirm": {
-        "message": "Nose down is nose down"
+        "message": "Direction checked"
     },
     "alignUnknown": {
-        "message": "This firmware doesn't let us read the setting here. Ask a DroneTeam member to check it."
+        "message": "This firmware doesn't report the board direction here. Ask a DroneTeam member to check it."
     },
     "alignFailed": {
-        "message": "The flight controller didn't accept the change. Ask a DroneTeam member."
+        "message": "Couldn't save the board direction. Ask a DroneTeam member for help."
     },
     "alignWhy": {
-        "message": "If the board thinks forward is to the left, pushing the stick forward would make the drone fly sideways. Saving makes the board restart; this page comes back by itself."
+        "message": "The board direction tells Betaflight which movements are roll, pitch and yaw. Saving restarts the board; the app reconnects afterwards."
     },
     "levelTitle": {
         "message": "Calibrate the accelerometer"
     },
     "levelLead": {
-        "message": "The accelerometer feels gravity, so it knows which way is down. Now we show it what flat looks like."
+        "message": "Calibration sets the level position used by the flight controller."
     },
     "levelTask": {
-        "message": "Put the drone on a flat table, then press the button. Don't touch it until it's done."
+        "message": "Place the drone on a flat table. Press Calibrate accelerometer and leave it still until calibration finishes."
     },
     "levelButton": {
         "message": "Calibrate accelerometer"
     },
     "levelBusy": {
-        "message": "Calibrating, hands off…"
+        "message": "Calibrating. Keep the drone still…"
     },
     "levelDone": {
-        "message": "Done. Your drone now knows what flat is."
+        "message": "Accelerometer calibrated."
     },
     "levelWhy": {
-        "message": "In angle mode, the beginner mode, the drone levels itself out when you let go of the sticks. It can only do that if it knows what level is."
+        "message": "In angle mode, the drone returns to level when you release the sticks. It uses the accelerometer to find that level position."
     },
     "safetyTitle": {
         "message": "Before the motors spin"
     },
     "safetyLead": {
-        "message": "Next the motors will spin. A spinning propeller can cut your fingers, so the propellers stay off for the whole test."
+        "message": "Remove all four propellers before testing the motors. Leave them off for the whole test: a spinning propeller can cut you."
     },
     "safetyPropsOff": {
-        "message": "All four propellers are off. I checked again."
+        "message": "I checked: all four propellers are removed"
     },
     "safetyWatcher": {
         "message": "A DroneTeam member is watching me"
@@ -138,7 +138,7 @@
         "message": "Now plug in the battery. Leave the USB cable connected."
     },
     "safetyBatteryOk": {
-        "message": "Battery found: {{volts}} V"
+        "message": "Battery connected: {{volts}} V"
     },
     "safetyBatteryWaiting": {
         "message": "Waiting for the battery…"
@@ -150,16 +150,16 @@
         "message": "Spin test"
     },
     "motorsLead": {
-        "message": "Two motors have to spin clockwise and two counter-clockwise. Test them one by one and tell us which way each one turns."
+        "message": "Test each motor and check its direction from above. Two should turn clockwise and two counter-clockwise."
     },
     "motorsEnable": {
-        "message": "Motor test on"
+        "message": "Enable motor test"
     },
     "motorsEnableHelp": {
-        "message": "Pressing any key on the keyboard stops all motors."
+        "message": "Press any keyboard key to stop all motors."
     },
     "motorsNoBattery": {
-        "message": "Plug in the battery first. The motors get their power from it, not from USB."
+        "message": "Connect the battery to power the motors. USB alone is not enough."
     },
     "motorsMapLabel": {
         "message": "Top view of the drone"
@@ -171,7 +171,7 @@
         "message": "Motor {{n}}"
     },
     "motorsPick": {
-        "message": "Click a motor on the drawing to start."
+        "message": "Select a motor to test."
     },
     "motorsSelected": {
         "message": "Motor {{n}}, {{position}}"
@@ -180,10 +180,10 @@
         "message": "Hold to spin motor {{n}}"
     },
     "motorsSpinFirst": {
-        "message": "Spin it first, then answer."
+        "message": "Run the motor before answering."
     },
     "motorsQuestion": {
-        "message": "Looking down from above, which way did motor {{n}} turn?"
+        "message": "From above, which way did motor {{n}} turn?"
     },
     "motorsCw": {
         "message": "Clockwise"
@@ -204,7 +204,7 @@
         "message": "Motor {{n}} spins the wrong way. Unplug the battery, swap any two of the three wires between this motor and its ESC, plug the battery back in and test again."
     },
     "motorsRetry": {
-        "message": "Test this motor again"
+        "message": "Test again"
     },
     "motorsProgress": {
         "message": "{{done}} of {{total}} motors correct"
@@ -213,7 +213,7 @@
         "message": "All motors spin the right way"
     },
     "motorsWhy": {
-        "message": "A spinning propeller pushes the drone the other way round, a bit like when you spin on an office chair. Two clockwise and two counter-clockwise cancel each other out. To turn, the drone speeds up one pair and slows down the other."
+        "message": "Turning a propeller also twists the frame in the opposite direction. With two motors turning each way, those forces balance. To turn the drone, the controller speeds up one pair and slows the other."
     },
     "posFrontLeft": {
         "message": "front left"
@@ -231,34 +231,34 @@
         "message": "Radio check"
     },
     "radioLead": {
-        "message": "Switch on your transmitter. Every stick movement travels through the air to the receiver inside the drone."
+        "message": "Switch on your transmitter, then move the sticks as shown below."
     },
     "radioNoSignal": {
-        "message": "No radio signal. Is the transmitter switched on? If it is, ask a DroneTeam member to bind it to your receiver."
+        "message": "No radio signal. Check that the transmitter is on. Ask a DroneTeam member if it needs pairing."
     },
     "radioThrottle": {
         "message": "Throttle"
     },
     "radioThrottleHelp": {
-        "message": "Left stick up and down: climb and sink"
+        "message": "Left stick up/down: more or less lift"
     },
     "radioYaw": {
         "message": "Yaw"
     },
     "radioYawHelp": {
-        "message": "Left stick left and right: spin on the spot"
+        "message": "Left stick left/right: turn"
     },
     "radioPitch": {
         "message": "Pitch"
     },
     "radioPitchHelp": {
-        "message": "Right stick up and down: nose down or up"
+        "message": "Right stick up/down: tilt the nose"
     },
     "radioRoll": {
         "message": "Roll"
     },
     "radioRollHelp": {
-        "message": "Right stick left and right: tilt sideways"
+        "message": "Right stick left/right: tilt sideways"
     },
     "radioAux1": {
         "message": "AUX 1"
@@ -270,7 +270,7 @@
         "message": "Push the left stick all the way up"
     },
     "radioTaskThrottleDown": {
-        "message": "…and all the way back down"
+        "message": "Pull the left stick all the way down"
     },
     "radioTaskYawLeft": {
         "message": "Push the left stick to the left"
@@ -282,31 +282,31 @@
         "message": "Push the right stick to the right"
     },
     "radioWhy": {
-        "message": "The receiver turns each stick into a number between 1000 and 2000. Middle is 1500. The flight controller mixes those four numbers into a speed for every motor."
+        "message": "The receiver sends stick positions as channel values, usually from 1000 to 2000 with 1500 in the centre. The flight controller uses them to adjust the motor speeds."
     },
     "doneTitle": {
-        "message": "Ready to fly"
+        "message": "Before your first flight"
     },
     "doneLead": {
-        "message": "Your drone is set up. A DroneTeam member will help you with the first flight."
+        "message": "Ask a DroneTeam member to check the drone and help you fly it."
     },
     "doneProps": {
-        "message": "Propellers on, and each one matches its motor's direction"
+        "message": "With the battery unplugged, fit each propeller to the matching motor direction"
     },
     "doneSticks": {
-        "message": "Throttle all the way down before arming"
+        "message": "Keep the throttle down when arming"
     },
     "doneHover": {
-        "message": "Hover low first, then climb"
+        "message": "Start with a low hover"
     },
     "doneArming": {
-        "message": "The box on the right shows what still stops the drone from arming. \"Connected to the laptop\" is normal: a drone never arms while USB is plugged in."
+        "message": "Resolve these checks before arming. The connection warning clears when you disconnect from the app."
     },
     "doneDisconnect": {
-        "message": "Press Disconnect, unplug the battery, then unplug the USB cable."
+        "message": "Press Disconnect. Unplug the battery, then the USB cable."
     },
     "liveTitle": {
-        "message": "Live from your drone"
+        "message": "Drone readings"
     },
     "liveRoll": {
         "message": "Roll"
@@ -321,16 +321,16 @@
         "message": "USB only"
     },
     "armingTitle": {
-        "message": "What stops take-off"
+        "message": "Arming checks"
     },
     "armingNone": {
-        "message": "Nothing is blocking arming."
+        "message": "No arming blocks reported."
     },
     "armingNO_GYRO": {
         "message": "No gyro found. Ask a DroneTeam member."
     },
     "armingFAILSAFE": {
-        "message": "Failsafe: the drone lost the radio signal and is in emergency mode."
+        "message": "Failsafe is active. Check the radio connection with a DroneTeam member."
     },
     "armingRXLOSS": {
         "message": "No radio signal. Is the transmitter on and bound?"
@@ -342,7 +342,7 @@
         "message": "The drone is tilted too far. Put it down flat."
     },
     "armingBOOT_GRACE_TIME": {
-        "message": "It has only just started. Wait a few seconds."
+        "message": "The flight controller is starting up. Wait a few seconds."
     },
     "armingNOPREARM": {
         "message": "Flip the pre-arm switch first."
@@ -354,19 +354,19 @@
         "message": "The command line is open."
     },
     "armingMSP": {
-        "message": "Connected to the laptop. A drone never arms while USB is plugged in."
+        "message": "The app is connected. Disconnect before arming."
     },
     "armingACC_CALIBRATION": {
-        "message": "The accelerometer needs calibrating (step 3)."
+        "message": "Calibrate the accelerometer in the Level step."
     },
     "armingMOTOR_PROTOCOL": {
         "message": "No motor protocol is set. Ask a DroneTeam member."
     },
     "armingREBOOT_REQUIRED": {
-        "message": "A setting needs a restart. Unplug the drone and plug it back in."
+        "message": "The flight controller needs a restart. Ask a DroneTeam member to help."
     },
     "armingARM_SWITCH": {
-        "message": "The arm switch is on. Flip it off; it has to start in the off position."
+        "message": "Turn the arm switch off before trying again."
     },
     "armingLOAD": {
         "message": "The processor is too busy."
@@ -378,13 +378,13 @@
         "message": "Instructor mode"
     },
     "instructorText": {
-        "message": "Shows the full Betaflight interface on this laptop until you lock it again or close the browser."
+        "message": "Enter your PIN to open the full Betaflight settings. Return to workshop mode when finished."
     },
     "instructorPin": {
         "message": "PIN"
     },
     "instructorWrong": {
-        "message": "Wrong PIN"
+        "message": "Incorrect PIN. Try again."
     },
     "instructorUnlock": {
         "message": "Unlock"
@@ -402,16 +402,16 @@
         "message": "Reset this group's progress"
     },
     "instructorBaseline": {
-        "message": "Reset kit to DronoBox baseline"
+        "message": "Restore kit settings"
     },
     "instructorBaselineMissing": {
-        "message": "No baseline yet. Paste a working kit's diff into baselineCli in src/dronobox/kit.ts. Needs firmware 4.5.4 or newer."
+        "message": "No saved kit settings are available. Ask the workshop organiser to add them."
     },
     "instructorBaselineOk": {
-        "message": "Baseline applied. The board is restarting."
+        "message": "Kit settings restored. The flight controller is restarting."
     },
     "instructorBaselineFailed": {
-        "message": "Baseline not applied:"
+        "message": "Couldn't restore the kit settings:"
     },
     "logoByline": {
         "message": "DroneTeam Twente"
@@ -423,43 +423,37 @@
         "message": "Language"
     },
     "welcomeTitle": {
-        "message": "Let's wake up your drone"
+        "message": "Set up your drone"
     },
     "welcomeLead": {
-        "message": "You built it. Now you teach it how to fly. This takes about fifteen minutes."
+        "message": "Check the sensors, motor directions and radio before your first flight."
     },
     "welcomeStep1": {
-        "message": "Plug the drone into this laptop"
+        "message": "Connect the USB cable"
     },
     "welcomeStep1Help": {
-        "message": "Use the micro-USB cable. Leave the battery out for now."
+        "message": "Connect the drone to your laptop with a micro-USB cable. Leave the battery unplugged."
     },
     "welcomeStep2": {
         "message": "Press Connect"
     },
     "welcomeStep2Help": {
-        "message": "Press the green Connect button below. Your browser asks which device to use: pick the one that mentions STM32 or Betaflight."
-    },
-    "welcomeStep3": {
-        "message": "Follow the steps"
-    },
-    "welcomeStep3Help": {
-        "message": "The app walks you through the checks one by one."
+        "message": "Choose the device with STM32 or Betaflight in its name."
     },
     "welcomeTroubleTitle": {
-        "message": "Your drone doesn't show up?"
+        "message": "Drone not listed?"
     },
     "welcomeTrouble1": {
-        "message": "Try another USB cable. Lots of cables can only charge and can't carry data."
+        "message": "Try a USB cable that supports data. Charge-only cables will not work."
     },
     "welcomeTrouble2": {
         "message": "Try another USB port on the laptop."
     },
     "welcomeTrouble3": {
-        "message": "Use Chrome or Edge. Safari and Firefox can't talk to USB devices."
+        "message": "Use Chrome or Edge for the USB connection."
     },
     "welcomeTrouble4": {
-        "message": "Still nothing? Ask a DroneTeam member."
+        "message": "Ask a DroneTeam member if it still does not appear."
     },
     "welcomeFooter": {
         "message": "Built by DroneTeam Twente on Betaflight, the open-source flight controller software (GPL-3.0)."
@@ -471,7 +465,7 @@
         "message": "Skip step"
     },
     "welcomeResume": {
-        "message": "Welcome back! Press Connect to carry on from step {{n}} ({{step}})."
+        "message": "Connect to resume step {{n}}: {{step}}."
     },
     "stepOf": {
         "message": "{{n}} of {{total}}"
@@ -483,64 +477,61 @@
         "message": "Spin test"
     },
     "meetTitle": {
-        "message": "What's in the box"
+        "message": "The parts of your drone"
     },
     "meetLead": {
-        "message": "Pick a part to see what it does. Drag the drone to look at it from any side, and scroll to zoom."
-    },
-    "meetHint": {
-        "message": "Start with the flight controller: the drone's brain."
+        "message": "Select a part to see what it does."
     },
     "meetDone": {
-        "message": "Next: the gyroscope"
+        "message": "Next: gyroscope"
     },
     "partFrame": {
         "message": "Frame"
     },
     "partFrameFact": {
-        "message": "3D-printed in PLA: one body, four truss arms and a lid with four twist locks. The holes in the arms keep them light but stiff."
+        "message": "The PLA frame holds the parts together. Its four arms use a truss shape to keep them light and stiff."
     },
     "partFc": {
         "message": "Flight controller"
     },
     "partFcFact": {
-        "message": "An F4V3S board with an STM32F405 processor at 168 MHz. It runs Betaflight, reads the gyroscope thousands of times a second and decides how fast each motor spins."
+        "message": "The F4V3S flight controller runs Betaflight. It reads the sensors and adjusts each motor to keep the drone steady."
     },
     "partPdb": {
         "message": "Power board"
     },
     "partPdbFact": {
-        "message": "A Matek power hub. The battery plugs in once (XT60) and the board shares that power out to the four ESCs (XT30) and a 5 V line for the flight controller."
+        "message": "The Matek power board distributes battery power to the four ESCs and supplies 5 V to the flight controller."
     },
     "partEsc": {
         "message": "ESC"
     },
     "partEscFact": {
-        "message": "A LittleBee 20 A speed controller, one per motor. It turns battery power into the three-phase pulses a brushless motor needs."
+        "message": "Each motor has a LittleBee 20 A ESC. It switches power through the motor's three wires to make it turn."
     },
     "partMotor": {
         "message": "Motor"
     },
     "partMotorFact": {
-        "message": "A Uangel X2807 1300 KV. KV means rpm per volt: on a 3S battery (11.1 V) that is about 14,000 rpm with nothing attached."
+        "message": "The X2807 motor turns the propeller. Its 1300 KV rating means roughly 1300 rpm per volt with no load."
     },
     "partProp": {
         "message": "Propeller"
     },
     "partPropFact": {
-        "message": "MR 8045: 8 inch across with a 4.5 inch pitch. Two spin clockwise and two counter-clockwise."
+        "message": "The 8-inch propellers push air down to lift the drone. Two turn clockwise and two counter-clockwise."
     },
     "partReceiver": {
         "message": "Receiver"
     },
     "partReceiverFact": {
-        "message": "A RadioMaster RP2 (ExpressLRS). It picks up your transmitter on 2.4 GHz and passes the stick positions to the flight controller."
+        "message": "The RadioMaster RP2 receives the transmitter signal and passes your stick positions to the flight controller."
     },
     "partBattery": {
         "message": "Battery"
     },
     "partBatteryFact": {
-        "message": "A Turnigy 3S 2200 mAh LiPo: three cells in series, 11.1 V. Never puncture it or short the plug."
+        "message": "The 3S 2200 mAh LiPo powers the drone. Never puncture the battery or short-circuit its connector."
     },
     "axisRoll": {
         "message": "Roll"
@@ -552,43 +543,43 @@
         "message": "Yaw"
     },
     "alignReplay": {
-        "message": "Show me again"
+        "message": "Replay"
     },
     "stillWaiting": {
-        "message": "Hold still…"
+        "message": "Keep the drone still…"
     },
     "stillMoving": {
-        "message": "It's moving. Put it down and let go."
+        "message": "Movement detected. Set the drone down and let go."
     },
     "stillTilted": {
-        "message": "It's tilted. Put it on a flat table."
+        "message": "The drone is tilted. Place it on a flat table."
     },
     "stillReady": {
-        "message": "Flat and still. Ready to calibrate."
+        "message": "Ready to calibrate."
     },
     "escTitle": {
         "message": "The ESC"
     },
     "escLead": {
-        "message": "Each motor has its own ESC: an electronic speed controller. The flight controller says how fast; the ESC switches the power."
+        "message": "Each motor has an electronic speed controller, or ESC."
     },
     "escFact1": {
-        "message": "A brushless motor has three wires. The ESC switches battery power between them thousands of times a second, so the magnets in the bell keep getting pulled round."
+        "message": "The flight controller sets the speed. The ESC switches power through the three motor wires to turn the rotor."
     },
     "escFact2": {
-        "message": "The order of those three wires decides the direction. Swap any two and the motor turns the other way."
+        "message": "Swapping any two motor wires reverses the direction. Disconnect the battery before changing wires."
     },
     "escFact3": {
-        "message": "On the DronoBox each ESC sits on its arm, right next to the motor it drives."
+        "message": "Find the ESC on the arm beside each motor."
     },
     "escNext": {
-        "message": "Why does direction matter?"
+        "message": "Try the motor simulation"
     },
     "sandboxTitle": {
-        "message": "Why the motors spin in pairs"
+        "message": "Test the motor directions"
     },
     "sandboxLead": {
-        "message": "Choose a direction for each motor, press take off and watch what the drone does."
+        "message": "Choose a direction for each motor, then press Take off. This is a simulation; the real motors stay off."
     },
     "sandboxTry": {
         "message": "Try:"
@@ -600,19 +591,19 @@
         "message": "All clockwise"
     },
     "sandboxPresetSplit": {
-        "message": "Left one way, right the other"
+        "message": "Left/right split"
     },
     "sandbox_stable": {
-        "message": "Stable. Diagonal motors turn the same way, so their twisting cancels out and the drone hovers."
+        "message": "It hovers. The clockwise pair balances the counter-clockwise pair; matching motors sit diagonally opposite each other."
     },
     "sandbox_spinCw": {
-        "message": "It spins clockwise! More props turn counter-clockwise, and the body twists the opposite way."
+        "message": "The frame turns clockwise because more propellers turn counter-clockwise."
     },
     "sandbox_spinCcw": {
-        "message": "It spins counter-clockwise! More props turn clockwise, and the body twists the opposite way."
+        "message": "The frame turns counter-clockwise because more propellers turn clockwise."
     },
     "sandbox_unstable": {
-        "message": "It wobbles and flips. The twisting balances out, but the flight controller expects diagonal pairs, so its corrections push the wrong motors."
+        "message": "It flips. The controller expects diagonal pairs, so this layout makes it correct the wrong motors."
     },
     "sandboxTakeOff": {
         "message": "Take off"
@@ -624,16 +615,16 @@
         "message": "Loading the drone…"
     },
     "stageFailed": {
-        "message": "The 3D drone couldn't load. Everything still works without it."
+        "message": "The 3D view couldn't load. Reload the page to try again."
     },
     "welcomeDemo": {
         "message": "Try it without a drone"
     },
     "gameTitle": {
-        "message": "Match the ghost"
+        "message": "Match the tilt"
     },
     "gameLead": {
-        "message": "A see-through drone takes a pose. Tilt yours until the two line up and hold it there. Five poses, against the clock."
+        "message": "Tilt your drone to match the outline, then hold still. Try all five positions."
     },
     "gameStart": {
         "message": "Play"
@@ -645,7 +636,7 @@
         "message": "Stop"
     },
     "gamePose": {
-        "message": "Pose {{n}} of {{total}}:"
+        "message": "Position {{n}} of {{total}}:"
     },
     "gameRoll": {
         "message": "roll"
@@ -657,12 +648,78 @@
         "message": "roll and pitch"
     },
     "gameMove": {
-        "message": "Tilt until the ghost turns green."
+        "message": "Match the outline with your drone."
     },
     "gameHold": {
-        "message": "Hold it…"
+        "message": "Hold still…"
     },
     "gameDone": {
-        "message": "All five in {{seconds}} s."
+        "message": "Five positions in {{seconds}} s."
+    },
+    "exploreAxes": {
+        "message": "Try each axis"
+    },
+    "axisSimulation": {
+        "message": "Simulation"
+    },
+    "axisLive": {
+        "message": "Live drone"
+    },
+    "axisIntro": {
+        "message": "Choose Roll, Pitch or Yaw to try it on the model."
+    },
+    "exploreRoll": {
+        "message": "Roll tilts the drone sideways around its nose-to-tail axis."
+    },
+    "explorePitch": {
+        "message": "Pitch tilts the nose up or down."
+    },
+    "exploreYaw": {
+        "message": "Yaw turns the nose left or right while the drone stays level."
+    },
+    "axisAngle": {
+        "message": "Angle"
+    },
+    "axisDragHint": {
+        "message": "This only moves the model."
+    },
+    "axisStageHint": {
+        "message": "Drag to rotate"
+    },
+    "axisReference": {
+        "message": "The outline shows the level position."
+    },
+    "stageHint": {
+        "message": "Drag to look around"
+    },
+    "stageZoomIn": {
+        "message": "Zoom in"
+    },
+    "stageZoomOut": {
+        "message": "Zoom out"
+    },
+    "stageReset": {
+        "message": "Reset view"
+    },
+    "assemblyLabel": {
+        "message": "Slide to take it apart"
+    },
+    "assemblyClosed": {
+        "message": "Together"
+    },
+    "assemblyOpen": {
+        "message": "Apart"
+    },
+    "welcomeLookInside": {
+        "message": "Look inside"
+    },
+    "welcomeModel": {
+        "message": "DronoBox V2"
+    },
+    "axisTryReal": {
+        "message": "Use my drone"
+    },
+    "welcomeAssemble": {
+        "message": "Put it together"
     }
 }

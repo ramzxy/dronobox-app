@@ -9,7 +9,7 @@ Betaflight is GPL-3.0-or-later and so is this fork. The files listed below were 
 - A welcome page with the 3D DronoBox and its own Connect button (Betaflight's sidebar, status bar, sponsors and community links are hidden while the workshop lock is on).
 - After connecting, nine lessons, mirroring the DronoBox V2 manual ("Drone Bible") and the 2026 workshop deck:
     1. **Parts**: the drone floats apart; pick a part to read what it is (facts from the kit's parts list).
-    2. **Gyroscope**: the lid lifts, the flight controller rises out of the body, the gyro chip lights up and three axis rings follow the real drone. Then **Match the ghost**: a see-through drone takes five poses and the participant tilts the real drone to copy each one, against the clock.
+    2. **Gyroscope**: the lid lifts, the flight controller rises out of the body, the gyro chip lights up and three axis rings follow the real drone. Then **Match the tilt**: a see-through drone takes five poses and the participant tilts the real drone to copy each one, against the clock.
     3. **Direction**: top view, an arrow sweeps 270° from the nose to where the board's arrow really points; one button sets CW 270° and saves.
     4. **Level**: a gravity arrow through the drone; calibration only unlocks once the drone has been flat and still for two seconds.
     5. **Motors**: the motors lift off their arms to show the ESCs and the three phase wires, then a sandbox: choose a direction per motor, take off, and watch it hover, spin or flip.
@@ -32,6 +32,15 @@ python tools/dronobox/build_kit_mesh.py DronoBoxV2.step src/public/dronobox/dron
 ```
 
 Motors, propellers, ESCs, receiver and battery are not in the STEP; they are modelled in `src/dronobox/stage/kitParts.ts` to their datasheet sizes (X2807 motor with spoked bell, MR 8045 props with their real pitch twist, LittleBee 20A in heat shrink, RP2 receiver, Turnigy 3S 2200 with strap, XT60 and balance lead).
+
+## Interactive teaching and rendering
+
+- **Parts:** an assembly slider lets the learner pull the kit apart and put it back together. Choosing a part opens the assembly again.
+- **Gyroscope:** the axis explorer isolates roll, pitch or yaw. Dragging the drone or using the keyboard-accessible angle slider rotates only the model. A stationary frame and coloured axis show what changes. **Use my drone** restores live readings; the experiment never marks a hardware check complete or sends commands to the flight controller.
+- Zoom buttons and reset-view work on touch screens. The model stays visible above the controls while scrolling lessons on narrow screens.
+- Static scenes stop rendering after transitions settle. Hidden/offscreen scenes stop immediately; input and visibility wake them. Rendering is capped at 60 fps and 1.6 million pixels. Reduced motion suppresses idle motion and inertial camera movement.
+- CAD geometry is shared across reconnects. Scene-owned materials, textures and environment targets are released on unmount.
+- The mesh converter orients each closed solid consistently before packing it, preserving separate CAD face vertices for sharp edges. `python -m unittest discover -s tools/dronobox -p test_mesh_winding.py` checks the winding repair.
 
 ## Instructor mode
 
@@ -99,7 +108,7 @@ Then open http://localhost:8080 in Chrome or Edge.
 
 `vercel.json` builds the static site (`npm run build`, output `src/dist`, install with `--ignore-scripts` so husky does not look for a git hooks folder). `vite.config.js` falls back to `VERCEL_GIT_COMMIT_SHA` because Vercel builds have no `.git`.
 
-1. The code lives in the public fork [ramzxy/dronobox-app](https://github.com/ramzxy/dronobox-app) on branch `dronobox` (its default branch, so pushes there deploy to production). `sourceUrl` in `src/dronobox/kit.ts` points there.
+1. The code lives in the public fork [ramzxy/dronobox-app](https://github.com/ramzxy/dronobox-app) on the default branch `dronobox`. Vercel deploys production from `master`; release commits are pushed to both branches. `sourceUrl` in `src/dronobox/kit.ts` points there.
 2. Vercel project `dronobox-app`, framework preset "Other"; `vercel.json` sets the rest. Node 24.
 3. Domain `dronobox.droneteamtwente.nl`, added in Vercel.
 4. In Cloudflare DNS, a CNAME `dronobox` to the target Vercel shows (`vercel domains inspect dronobox.droneteamtwente.nl`), proxy **off** (grey cloud), so Vercel can issue the certificate.

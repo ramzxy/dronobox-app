@@ -3,6 +3,7 @@
         ref="root"
         class="kit-stage"
         :class="{ 'is-draggable': draggable }"
+        @lostpointercapture="onPointerUp"
         @pointerdown="onPointerDown"
         @pointermove="onPointerMove"
         @pointerup="onPointerUp"
@@ -29,6 +30,37 @@
         </div>
         <p v-if="state === 'loading'" class="kit-stage__status">{{ $t("dronobox:stageLoading") }}</p>
         <p v-else-if="state === 'failed'" class="kit-stage__status">{{ $t("dronobox:stageFailed") }}</p>
+        <div v-if="state === 'ready'" class="kit-stage__toolbar" @pointerdown.stop @wheel.stop>
+            <span class="kit-stage__hint">{{
+                $t(input.axisDemo ? "dronobox:axisStageHint" : "dronobox:stageHint")
+            }}</span>
+            <div class="kit-stage__tools">
+                <UButton
+                    color="neutral"
+                    variant="ghost"
+                    icon="i-lucide-minus"
+                    :aria-label="$t('dronobox:stageZoomOut')"
+                    :title="$t('dronobox:stageZoomOut')"
+                    @click="zoomOut"
+                />
+                <UButton
+                    color="neutral"
+                    variant="ghost"
+                    icon="i-lucide-plus"
+                    :aria-label="$t('dronobox:stageZoomIn')"
+                    :title="$t('dronobox:stageZoomIn')"
+                    @click="zoomIn"
+                />
+                <UButton
+                    color="neutral"
+                    variant="ghost"
+                    icon="i-lucide-scan"
+                    :aria-label="$t('dronobox:stageReset')"
+                    :title="$t('dronobox:stageReset')"
+                    @click="resetView"
+                />
+            </div>
+        </div>
         <slot />
     </div>
 </template>
@@ -47,7 +79,7 @@ const props = withDefaults(
     { highlight: null, draggable: true },
 );
 
-const emit = defineEmits<{ pick: [part: KitPart]; hover: [part: KitPart | null] }>();
+const emit = defineEmits<{ pick: [part: KitPart]; hover: [part: KitPart | null]; turn: [delta: number] }>();
 
 const root = ref<HTMLElement | null>(null);
 const canvas = ref<HTMLCanvasElement | null>(null);
@@ -56,6 +88,16 @@ const labels = new Map<KitPart, HTMLElement>();
 let stage: KitStage | null = null;
 let observer: ResizeObserver | null = null;
 let unmounted = false;
+let intersection: IntersectionObserver | null = null;
+let inView = true;
+const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+function syncMotion(): void {
+    stage?.setReducedMotion(motionPreference.matches);
+}
+function syncVisibility(): void {
+    if (document.hidden || !inView) stage?.stop();
+    else stage?.start();
+}
 
 function setLabel(part: KitPart, el: HTMLElement | null): void {
     if (el) {
@@ -71,37 +113,70 @@ function placeLabels(anchors: LabelAnchor[]): void {
         if (!el) {
             continue;
         }
-        el.style.transform = `translate(${anchor.x.toFixed(1)}px, ${anchor.y.toFixed(1)}px)`;
+        if (!anchor.visible) {
+            el.classList.remove("is-visible");
+            continue;
+        }
+        const width = root.value?.clientWidth ?? 0;
+        const height = root.value?.clientHeight ?? 0;
+        const x = Math.max(8, Math.min(width - el.offsetWidth - 16, anchor.x));
+        const y = Math.max(72, Math.min(height - 40, anchor.y));
+        const transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+        if (el.style.transform !== transform) el.style.transform = transform;
         el.classList.toggle("is-visible", anchor.visible);
     }
 }
 
 let dragging = false;
+let activePointer: number | null = null;
 let lastX = 0;
 let lastY = 0;
 
 function onPointerDown(event: PointerEvent): void {
-    if (!props.draggable) {
+    if (
+        !props.draggable ||
+        activePointer !== null ||
+        event.button !== 0 ||
+        (event.target as HTMLElement).closest("button, input, a")
+    ) {
         return;
     }
     dragging = true;
+    activePointer = event.pointerId;
     lastX = event.clientX;
     lastY = event.clientY;
     (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
 }
 
 function onPointerMove(event: PointerEvent): void {
-    if (!dragging || !stage) {
+    if (!dragging || !stage || event.pointerId !== activePointer) {
         return;
     }
-    stage.drag(event.clientX - lastX, event.clientY - lastY);
+    if (props.input.axisDemo) {
+        emit("turn", (event.clientX - lastX - (event.clientY - lastY)) * 0.45);
+    } else {
+        stage.drag(event.clientX - lastX, event.clientY - lastY);
+    }
     lastX = event.clientX;
     lastY = event.clientY;
 }
 
 function onPointerUp(): void {
+    const pointer = activePointer;
+    activePointer = null;
     dragging = false;
+    if (pointer !== null && root.value?.hasPointerCapture(pointer)) root.value.releasePointerCapture(pointer);
     stage?.endDrag();
+}
+
+function zoomIn(): void {
+    stage?.zoom(-180);
+}
+function zoomOut(): void {
+    stage?.zoom(180);
+}
+function resetView(): void {
+    stage?.resetView();
 }
 
 function onWheel(event: WheelEvent): void {
@@ -133,7 +208,15 @@ onMounted(async () => {
         observer.observe(root.value);
         const box = root.value.getBoundingClientRect();
         stage.resize(box.width, box.height);
-        stage.start();
+        syncMotion();
+        document.addEventListener("visibilitychange", syncVisibility);
+        motionPreference.addEventListener("change", syncMotion);
+        intersection = new IntersectionObserver(([entry]) => {
+            inView = entry.isIntersecting;
+            syncVisibility();
+        });
+        intersection.observe(root.value);
+        syncVisibility();
         state.value = "ready";
     } catch (error) {
         console.error("DronoBox: 3D stage failed", error);
@@ -144,6 +227,9 @@ onMounted(async () => {
 onBeforeUnmount(() => {
     unmounted = true;
     observer?.disconnect();
+    intersection?.disconnect();
+    document.removeEventListener("visibilitychange", syncVisibility);
+    motionPreference.removeEventListener("change", syncMotion);
     stage?.dispose();
     stage = null;
 });
@@ -167,6 +253,31 @@ onBeforeUnmount(() => {
         cursor: grabbing;
     }
 
+    &__toolbar {
+        position: absolute;
+        inset: 1.25rem 1.25rem auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        pointer-events: none;
+    }
+    &__hint {
+        color: var(--dronobox-ink-soft);
+        font-size: 0.75rem;
+    }
+    &__tools {
+        display: flex;
+        pointer-events: auto;
+        background: var(--dronobox-chip);
+        border: 1px solid var(--dronobox-line);
+        border-radius: 0.75rem;
+        padding: 0.25rem;
+        button {
+            min-width: 2.5rem;
+            min-height: 2.5rem;
+        }
+    }
     &__canvas {
         display: block;
         width: 100%;
@@ -198,7 +309,6 @@ onBeforeUnmount(() => {
             opacity 0.3s ease,
             background-color 0.2s ease,
             border-color 0.2s ease;
-        will-change: transform;
 
         &.is-visible {
             opacity: 1;

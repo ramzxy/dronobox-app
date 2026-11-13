@@ -56,3 +56,6 @@ components.d.ts
 /*.pem
 /CLAUDE.md
 /.claude
+
+# Python CAD tooling
+__pycache__/

@@ -21,6 +21,8 @@ import sys
 import gmsh
 import numpy as np
 
+from mesh_winding import orient_closed_mesh
+
 # Volume tags as gmsh numbers them for "Prototype v75.step" (DronoBoxV2.step, Oct 2025 export).
 # Checked against bounding boxes: body 105 x 35 x 105 mm, arms 138 mm reach, lid dome 45 mm tall.
 GROUPS = {
@@ -47,6 +49,8 @@ def mesh_volumes(tags):
     positions, indices = [], []
     base = 0
     for vol in tags:
+        volume_start = len(positions)
+        volume_base = base
         # oriented=True signs each face: negative means its triangles wind inwards relative to
         # this volume, so they are flipped to keep every normal pointing out of the part.
         faces = gmsh.model.getBoundary([(3, vol)], oriented=True, combined=False)
@@ -68,6 +72,16 @@ def mesh_volumes(tags):
             positions.append(np.asarray(coords, dtype=np.float64).reshape(-1, 3))
             indices.append(tri + base)
             base += len(node_tags)
+        # Orient each solid separately: neighbouring electronics can touch, so
+        # welding the entire assembly would create artificial non-manifold edges.
+        volume_positions = np.concatenate(positions[volume_start:])
+        volume_indices = np.concatenate(indices[volume_start:]) - volume_base
+        oriented = orient_closed_mesh(np.round(volume_positions, 6), volume_indices) + volume_base
+        cursor = 0
+        for face_index in range(volume_start, len(indices)):
+            count = len(indices[face_index])
+            indices[face_index] = oriented[cursor:cursor + count]
+            cursor += count
     return np.concatenate(positions), np.concatenate(indices)
 
 
