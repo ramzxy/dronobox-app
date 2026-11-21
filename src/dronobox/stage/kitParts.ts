@@ -51,11 +51,12 @@ export const KIT_COLOURS = {
     xt60: 0xf0c018,
     jst: 0xf2efe6,
     receiver: 0x9cc4ff,
-    accent: 0x4da3ff,
+    accent: 0x5aaef5,
+    ccw: 0xf29f67,
     gyro: 0x5cf2c3,
-    axisRoll: 0xff5a5f,
+    axisRoll: 0xff6b6f,
     axisPitch: 0x46d68c,
-    axisYaw: 0x4da3ff,
+    axisYaw: 0x5aaef5,
     gravity: 0xffc94d,
 } as const;
 
@@ -627,25 +628,4 @@ export function createGravityArrow(length: number): THREE.Group {
     head.position.y = -length - 6;
     group.add(shaft, head);
     return group;
-}
-
-/** Expanding rings that say "radio" without words. Animate with updateWaves. */
-export function createWaves(count: number, colour: number): THREE.Group {
-    const group = new THREE.Group();
-    for (let i = 0; i < count; i++) {
-        const ring = new THREE.Mesh(new THREE.TorusGeometry(10, 0.8, 8, 64), glow(colour, 0.6));
-        ring.rotation.x = Math.PI / 2;
-        ring.userData.phase = i / count;
-        group.add(ring);
-    }
-    return group;
-}
-
-export function updateWaves(group: THREE.Group, time: number, maxRadius: number): void {
-    for (const child of group.children) {
-        const ring = child as THREE.Mesh;
-        const t = (time * 0.45 + (ring.userData.phase as number)) % 1;
-        ring.scale.setScalar(0.4 + t * (maxRadius / 10));
-        (ring.material as THREE.MeshBasicMaterial).opacity = 0.65 * (1 - t);
-    }
 }

@@ -94,6 +94,32 @@ describe("DronoBox scene lifecycle", () => {
         expect(vi.mocked(stage.renderer.render).mock.calls.length).toBeGreaterThan(frames);
     });
 
+    it("lets the welcome drone come to rest instead of bobbing forever", () => {
+        stage.update({ shot: "hero" });
+        stage.start();
+        vi.advanceTimersByTime(3000);
+        const frames = vi.mocked(stage.renderer.render).mock.calls.length;
+        vi.advanceTimersByTime(1000);
+        expect(stage.renderer.render).toHaveBeenCalledTimes(frames);
+    });
+
+    it("follows the real drone on a non-gyro lesson, ignoring sensor jitter", () => {
+        const tilt = (stage as unknown as { tiltGroup: THREE.Group }).tiltGroup;
+        stage.update({ shot: "safety", liveTilt: true, attitude: { roll: 0, pitch: 0, heading: 0 } });
+        stage.start();
+        vi.advanceTimersByTime(3000);
+        const frames = vi.mocked(stage.renderer.render).mock.calls.length;
+
+        stage.update({ attitude: { roll: 0.05, pitch: -0.05, heading: 0.1 } });
+        vi.advanceTimersByTime(500);
+        expect(stage.renderer.render).toHaveBeenCalledTimes(frames);
+
+        stage.update({ attitude: { roll: 20, pitch: 0, heading: 0 } });
+        vi.advanceTimersByTime(1000);
+        expect(vi.mocked(stage.renderer.render).mock.calls.length).toBeGreaterThan(frames);
+        expect(tilt.rotation.z).toBeCloseTo((-20 * Math.PI) / 180, 2);
+    });
+
     it("does no rendering while hidden, even when new inputs arrive", () => {
         stage.start();
         vi.advanceTimersByTime(100);

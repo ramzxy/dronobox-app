@@ -36,7 +36,6 @@ import {
     createPropBlur,
     createReceiver,
     createSpinArrow,
-    createWaves,
     createEsc,
     createWire,
     placeWire,
@@ -44,7 +43,6 @@ import {
     PHASE_COLOURS,
     glow,
     surface,
-    updateWaves,
     type MotorRig,
 } from "./kitParts";
 
@@ -58,19 +56,7 @@ import {
  */
 
 export type ShotName =
-    | "hero"
-    | "meet"
-    | "gyro"
-    | "align"
-    | "level"
-    | "esc"
-    | "sandbox"
-    | "safety"
-    | "spin"
-    | "radio"
-    | "done"
-    | "gyroGame"
-    | "axes";
+    "hero" | "meet" | "gyro" | "align" | "level" | "esc" | "sandbox" | "safety" | "spin" | "done" | "gyroGame" | "axes";
 
 export type KitPart = "frame" | "fc" | "pdb" | "esc" | "motor" | "prop" | "receiver" | "battery";
 
@@ -87,8 +73,11 @@ export interface StageInput {
     shot: ShotName;
     /** Live attitude in degrees, as Betaflight reports it. */
     attitude: { roll: number; pitch: number; heading: number };
-    /** Stick positions, roll/pitch/yaw -1..1 and throttle 0..1, or null when the radio is silent. */
-    sticks: { roll: number; pitch: number; yaw: number; throttle: number } | null;
+    /**
+     * Once the gyro lesson has been reached, the 3D drone follows the real one on every shot,
+     * with any lesson motion (the sandbox flight) added on top.
+     */
+    liveTilt: boolean;
     /** Motor being spun by the real motor test, 1-based. */
     spinningMotor: number | null;
     selectedMotor: number | null;
@@ -97,6 +86,10 @@ export interface StageInput {
     propsOn: boolean;
     batteryIn: boolean;
     highlight: KitPart | null;
+    /** Parts lesson: the part the camera moves in on. */
+    focus: KitPart | null;
+    /** ESC lesson: the speed signal sent to the close-up motor (0..1), and whether two of its wires are swapped. */
+    escDemo: { throttle: number; swapped: boolean } | null;
     sandbox: { dirs: Record<number, SpinDirection>; flying: boolean } | null;
     /** Alignment demo: 0 shows where Betaflight assumes the arrow points, 1 where it really points. */
     alignTurn: number;
@@ -113,7 +106,7 @@ export interface LabelAnchor {
 }
 
 type ExplodeKey = "lid" | "fc" | "pdb" | "esc" | "motor" | "arm" | "receiver" | "battery";
-type Overlay = "gimbal" | "gravity" | "align" | "spinArrows" | "waves" | "labels" | "chip" | "wires";
+type Overlay = "gimbal" | "gravity" | "align" | "spinArrows" | "labels" | "chip" | "wires";
 
 interface Shot {
     /**
@@ -125,7 +118,7 @@ interface Shot {
     explode: Partial<Record<ExplodeKey, number>>;
     overlays: Overlay[];
     /** How the drone's attitude is driven in this shot. */
-    motion: "rest" | "live" | "sticks" | "sandbox" | "hover" | "float";
+    motion: "rest" | "live" | "sandbox";
     /** Fade the lifted lid so the camera can look inside. */
     seeInside?: boolean;
 }
@@ -143,7 +136,7 @@ const SHOTS: Record<ShotName, Shot> = {
         target: [0, 10, 0],
         explode: {},
         overlays: [],
-        motion: "float",
+        motion: "rest",
     },
     meet: {
         orbit: { azimuth: 35, elevation: 30, distance: 1180 },
@@ -161,8 +154,8 @@ const SHOTS: Record<ShotName, Shot> = {
         seeInside: true,
     },
     align: {
-        orbit: { azimuth: 0, elevation: 86, distance: 860 },
-        target: [0, 20, -30],
+        orbit: { azimuth: 28, elevation: 46, distance: 900 },
+        target: [0, 20, -40],
         explode: { lid: 1, fc: 0.35 },
         overlays: ["align"],
         motion: "rest",
@@ -179,7 +172,7 @@ const SHOTS: Record<ShotName, Shot> = {
         orbit: { azimuth: 45, elevation: 26, distance: 360 },
         target: [100, 42, -100],
         explode: { esc: 0.7, motor: 0.9 },
-        overlays: ["wires"],
+        overlays: ["wires", "spinArrows"],
         motion: "rest",
     },
     sandbox: {
@@ -203,14 +196,6 @@ const SHOTS: Record<ShotName, Shot> = {
         overlays: ["spinArrows"],
         motion: "rest",
     },
-    radio: {
-        orbit: { azimuth: 22, elevation: 26, distance: 960 },
-        target: [0, 60, 0],
-        explode: { lid: 1, receiver: 1 },
-        overlays: ["waves"],
-        motion: "sticks",
-        seeInside: true,
-    },
     gyroGame: {
         orbit: { azimuth: 0, elevation: 20, distance: 820 },
         target: [0, 15, 0],
@@ -219,11 +204,11 @@ const SHOTS: Record<ShotName, Shot> = {
         motion: "live",
     },
     done: {
-        orbit: { azimuth: 35, elevation: 16, distance: 1000 },
-        target: [0, 80, 0],
+        orbit: { azimuth: 35, elevation: 18, distance: 980 },
+        target: [0, 12, 0],
         explode: {},
         overlays: [],
-        motion: "hover",
+        motion: "rest",
     },
 };
 
@@ -261,6 +246,8 @@ const ARM_SLOTS: { quarter: number; motor: number }[] = [
 ];
 
 const DEG = Math.PI / 180;
+/** The motor in the ESC close-up: front right, nearest the camera. */
+export const ESC_DEMO_MOTOR = 2;
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 
 /** Critically damped approach: frame-rate independent smoothing towards a target. */
@@ -290,6 +277,30 @@ function smoothDamp(current: number, target: number, state: { v: number }, smoot
     const temp = (state.v + omega * change) * dt;
     state.v = (state.v - omega * temp) * decay;
     return target + (change + temp) * decay;
+}
+
+/** Whether new stage input is worth rendering: attitude jitter under a fifth of a degree is not. */
+function inputChanged(before: StageInput, after: StageInput): boolean {
+    for (const key of Object.keys(after) as (keyof StageInput)[]) {
+        const a = before[key];
+        const b = after[key];
+        if (a === b) continue;
+        if (key === "attitude") {
+            const x = a as StageInput["attitude"];
+            const y = b as StageInput["attitude"];
+            if (
+                Math.abs(x.roll - y.roll) > 0.2 ||
+                Math.abs(x.pitch - y.pitch) > 0.2 ||
+                Math.abs(x.heading - y.heading) > 0.2
+            ) {
+                return true;
+            }
+            continue;
+        }
+        if (typeof a !== "object" || typeof b !== "object" || a === null || b === null) return true;
+        if (JSON.stringify(a) !== JSON.stringify(b)) return true;
+    }
+    return false;
 }
 
 interface MotorSlot {
@@ -332,6 +343,7 @@ export class KitStage {
     private readonly scratchAcross = new THREE.Vector3();
     private readonly scratchEsc = new THREE.Vector3();
     private readonly scratchMotor = new THREE.Vector3();
+    private readonly scratchFocus = new THREE.Vector3();
     private readonly cameraPos = orbitPosition(SHOTS.hero, new THREE.Vector3());
     private readonly cameraTarget = new THREE.Vector3(...SHOTS.hero.target);
 
@@ -355,7 +367,6 @@ export class KitStage {
     private alignGhost!: THREE.Mesh;
     private alignReal!: THREE.Mesh;
     private frontArrow!: THREE.Mesh;
-    private waves!: THREE.Group;
     private receiver!: THREE.Group;
     private battery!: THREE.Group;
     private shadow!: THREE.Mesh;
@@ -366,13 +377,15 @@ export class KitStage {
         axisDemo: null,
         assembly: 1,
         attitude: { roll: 0, pitch: 0, heading: 0 },
-        sticks: null,
+        liveTilt: false,
         spinningMotor: null,
         selectedMotor: null,
         revealedMotors: [],
         propsOn: true,
         batteryIn: true,
         highlight: null,
+        focus: null,
+        escDemo: null,
         sandbox: null,
         alignTurn: 1,
         ghost: null,
@@ -384,6 +397,11 @@ export class KitStage {
     private yaw = 0;
     private pitch = 0;
     private roll = 0;
+    /** The real drone's tilt, kept apart from lesson motion so each eases at its own pace. */
+    private liveRoll = 0;
+    private livePitch = 0;
+    /** How fast the drone is turning (rad/s, smoothed): what a gyro actually measures. */
+    private turnRate = 0;
     private altitude = 0;
     private readonly springs = new Map<string, { v: number }>();
     private orbitAzimuth = 0;
@@ -561,6 +579,7 @@ export class KitStage {
             this.tiltGroup.add(esc);
             const wires = PHASE_COLOURS.map((colour) => {
                 const wire = createWire(colour);
+                (wire.material as THREE.MeshStandardMaterial).emissive = new THREE.Color(KIT_COLOURS.gravity);
                 this.tiltGroup.add(wire);
                 return wire;
             });
@@ -602,7 +621,7 @@ export class KitStage {
 
             const arrows = {
                 cw: createSpinArrow(46, "cw", KIT_COLOURS.accent),
-                ccw: createSpinArrow(46, "ccw", KIT_COLOURS.accent),
+                ccw: createSpinArrow(46, "ccw", KIT_COLOURS.ccw),
             };
             for (const arrow of Object.values(arrows)) {
                 arrow.position.y = 30;
@@ -710,20 +729,7 @@ export class KitStage {
         this.frontArrow.position.set(0, 2, -230);
         this.tiltGroup.add(this.frontArrow);
 
-        this.waves = createWaves(4, KIT_COLOURS.receiver);
-        this.receiver.add(this.waves);
-        this.waves.position.y = 6;
-
-        for (const key of [
-            "gimbal",
-            "gravity",
-            "align",
-            "spinArrows",
-            "waves",
-            "labels",
-            "chip",
-            "wires",
-        ] as Overlay[]) {
+        for (const key of ["gimbal", "gravity", "align", "spinArrows", "labels", "chip", "wires"] as Overlay[]) {
             this.overlayOpacity.set(key, 0);
         }
     }
@@ -754,9 +760,12 @@ export class KitStage {
     // --- public API -------------------------------------------------------------------------
 
     update(input: Partial<StageInput>): void {
-        const previousShot = this.input.shot;
-        this.input = { ...this.input, ...input };
-        this.wake();
+        const previous = this.input;
+        const previousShot = previous.shot;
+        this.input = { ...previous, ...input };
+        // Attitude arrives 20 times a second with sensor noise; a drone lying still on the table
+        // should not keep the GPU busy.
+        if (inputChanged(previous, this.input)) this.wake();
         if (input.shot && input.shot !== previousShot) {
             // A new lesson starts from a level, untilted drone facing the camera's way.
             this.headingZero = null;
@@ -845,7 +854,7 @@ export class KitStage {
         }
         const continuous =
             !this.reducedMotion &&
-            (["hero", "done", "radio"].includes(this.input.shot) ||
+            ((this.input.shot === "esc" && (this.input.escDemo?.throttle ?? 0) > 0) ||
                 this.input.spinningMotor !== null ||
                 (this.input.shot === "sandbox" && this.input.sandbox?.flying));
         if (continuous || this.dragging || this.settleRemaining > 0) {
@@ -906,18 +915,22 @@ export class KitStage {
         }
         const elevation = THREE.MathUtils.clamp(shot.orbit.elevation + this.orbitElevation, -8, 88);
         this.orbitElevation = elevation - shot.orbit.elevation;
+        this.cameraTarget.set(...shot.target);
+        let distance = shot.orbit.distance * this.orbitZoom;
+        const focus = this.input.shot === "meet" ? this.anchors.get(this.input.focus as KitPart) : undefined;
+        if (focus) {
+            focus.getWorldPosition(this.scratchFocus);
+            this.cameraTarget.lerp(this.scratchFocus, 0.6);
+            distance *= 0.72;
+        }
         orbitPosition(
             {
                 ...shot,
-                orbit: {
-                    azimuth: shot.orbit.azimuth + this.orbitAzimuth,
-                    elevation,
-                    distance: shot.orbit.distance * this.orbitZoom,
-                },
+                target: [this.cameraTarget.x, this.cameraTarget.y, this.cameraTarget.z],
+                orbit: { azimuth: shot.orbit.azimuth + this.orbitAzimuth, elevation, distance },
             },
             this.cameraPos,
         );
-        this.cameraTarget.set(...shot.target);
         const smooth = this.reducedMotion ? 0.001 : this.dragging ? 0.08 : 0.48;
         this.camera.position.set(
             smoothDamp(this.camera.position.x, this.cameraPos.x, this.spring("cx"), smooth, dt),
@@ -990,12 +1003,14 @@ export class KitStage {
             // Phase wires run from the ESC's outer end to the foot of its motor.
             const wiresShown = (this.overlayOpacity.get("wires") ?? 0) > 0.02;
             const across = this.scratchAcross.set(-out.z, 0, out.x);
+            const swapped = this.input.shot === "esc" && slot.number === ESC_DEMO_MOTOR && this.input.escDemo?.swapped;
             slot.wires.forEach((wire, i) => {
                 wire.visible = wiresShown;
                 if (!wiresShown) {
                     return;
                 }
                 const side = (i - 1) * 3.2;
+                const motorSide = ((swapped && i < 2 ? 1 - i : i) - 1) * 3.2;
                 const escEnd = this.scratchEsc
                     .set(ESC_MOUNT.x, ESC_MOUNT.top + 2.6, ESC_MOUNT.z)
                     .applyAxisAngle(Y_AXIS, slot.angle)
@@ -1005,7 +1020,7 @@ export class KitStage {
                 const motorFoot = this.scratchMotor
                     .copy(slot.motorHolder.position)
                     .addScaledVector(out, -15)
-                    .addScaledVector(across, side)
+                    .addScaledVector(across, motorSide)
                     .setY(slot.motorHolder.position.y + 3);
                 placeWire(wire, escEnd, motorFoot);
             });
@@ -1031,33 +1046,21 @@ export class KitStage {
         const input = this.input;
 
         const demo = input.shot === "axes" ? input.axisDemo : null;
+        const live = !demo && (shot.motion === "live" || input.liveTilt);
+        let liveYaw = 0;
+        if (live) {
+            this.headingZero ??= input.attitude.heading;
+            liveYaw = -(input.attitude.heading - this.headingZero) * DEG;
+        }
+        const liveRate = this.reducedMotion ? 25 : 14;
+        const lastRoll = this.liveRoll;
+        const lastPitch = this.livePitch;
+        this.liveRoll = approach(this.liveRoll, live ? -input.attitude.roll * DEG : 0, liveRate, dt);
+        this.livePitch = approach(this.livePitch, live ? -input.attitude.pitch * DEG : 0, liveRate, dt);
+
         if (demo) {
             targetRoll = demo.axis === "roll" ? -demo.angle * DEG : 0;
             targetPitch = demo.axis === "pitch" ? -demo.angle * DEG : 0;
-            this.yaw = angleApproach(this.yaw, demo.axis === "yaw" ? -demo.angle * DEG : 0, 18, dt);
-        } else if (shot.motion === "live") {
-            const { roll, pitch, heading } = input.attitude;
-            this.headingZero ??= heading;
-            targetRoll = -roll * DEG;
-            targetPitch = -pitch * DEG;
-            const targetYaw = -(heading - this.headingZero) * DEG;
-            this.yaw = angleApproach(this.yaw, targetYaw, 12, dt);
-        } else if (shot.motion === "sticks" && input.sticks) {
-            const s = input.sticks;
-            // Angle mode feel: stick deflection becomes a tilt, yaw stick a turn rate, throttle a height.
-            targetRoll = -s.roll * 28 * DEG;
-            targetPitch = -s.pitch * 28 * DEG;
-            yawRate = -s.yaw * 140 * DEG;
-            targetAltitude = Math.max(0, s.throttle - 0.08) * 120;
-        } else if (shot.motion === "float" && !this.reducedMotion) {
-            // Resting in the air, breathing slightly: alive without spinning.
-            targetAltitude = 12 + Math.sin(this.time * 1.1) * 3;
-            targetRoll = Math.sin(this.time * 0.7) * 1.2 * DEG;
-            targetPitch = Math.cos(this.time * 0.55) * 1.2 * DEG;
-        } else if (shot.motion === "hover") {
-            targetAltitude = 70 + Math.sin(this.time * 1.4) * 6;
-            targetRoll = Math.sin(this.time * 0.9) * 1.5 * DEG;
-            targetPitch = this.reducedMotion ? 0 : Math.cos(this.time * 0.7) * 1.5 * DEG;
         } else if (shot.motion === "sandbox") {
             const result = this.sandboxStep(dt);
             targetRoll = result.roll;
@@ -1066,24 +1069,32 @@ export class KitStage {
             yawRate = result.yawRate;
         }
 
-        if (shot.motion === "sticks") {
-            this.stickYaw += yawRate * dt;
-            this.yaw = angleApproach(this.yaw, this.stickYaw, 8, dt);
+        const lastYaw = this.yaw;
+        if (demo) {
+            this.yaw = angleApproach(this.yaw, demo.axis === "yaw" ? -demo.angle * DEG : 0, 18, dt);
         } else if (shot.motion === "sandbox") {
             this.stickYaw += yawRate * dt;
-            this.yaw = angleApproach(this.yaw, this.stickYaw, 10, dt);
-        } else if (shot.motion !== "live" && !demo) {
+            this.yaw = angleApproach(this.yaw, liveYaw + this.stickYaw, 10, dt);
+        } else {
             this.stickYaw = 0;
-            this.yaw = angleApproach(this.yaw, 0, 3, dt);
+            this.yaw = angleApproach(this.yaw, liveYaw, live ? 12 : 3, dt);
         }
 
-        const rate = demo || this.reducedMotion ? 25 : shot.motion === "live" ? 14 : 4;
+        const rate = demo || this.reducedMotion ? 25 : 4;
         this.roll = approach(this.roll, targetRoll, rate, dt);
         this.pitch = approach(this.pitch, targetPitch, rate, dt);
         this.altitude = approach(this.altitude, targetAltitude, shot.motion === "sandbox" ? 2.2 : 3, dt);
 
+        if (dt > 0) {
+            const turned =
+                Math.abs(this.liveRoll - lastRoll) +
+                Math.abs(this.livePitch - lastPitch) +
+                Math.abs(this.yaw - lastYaw);
+            this.turnRate = approach(this.turnRate, turned / dt, 10, dt);
+        }
+
         this.yawGroup.rotation.y = this.yaw;
-        this.tiltGroup.rotation.set(this.pitch, 0, this.roll);
+        this.tiltGroup.rotation.set(this.pitch + this.livePitch, 0, this.roll + this.liveRoll);
         this.lift.position.y = this.altitude;
 
         // The ghost follows the drone's heading (only roll and pitch are being matched).
@@ -1177,25 +1188,26 @@ export class KitStage {
         this.propsShown = approach(this.propsShown, input.propsOn ? 1 : 0, 3, dt);
 
         let poweredSpeed = 0;
-        if (shot.motion === "hover") {
+        if (shot.motion === "sandbox" && this.sandboxFlying) {
             poweredSpeed = 1;
-        } else if (shot.motion === "sandbox" && this.sandboxFlying) {
-            poweredSpeed = 1;
-        } else if (shot.motion === "sticks" && input.sticks && input.sticks.throttle > 0.08) {
-            poweredSpeed = 0.5 + input.sticks.throttle * 0.5;
         }
+        const escDemo = input.shot === "esc" ? input.escDemo : null;
 
         for (const slot of this.slots) {
             const revealed = input.revealedMotors.includes(slot.number);
             const realSpin = input.spinningMotor === slot.number;
             const sandboxDirection = input.sandbox?.dirs[slot.number];
-            const direction = shot.motion === "sandbox" && sandboxDirection ? sandboxDirection : slot.direction;
+            const escMotor = escDemo && slot.number === ESC_DEMO_MOTOR ? escDemo : null;
+            let direction = shot.motion === "sandbox" && sandboxDirection ? sandboxDirection : slot.direction;
+            if (escMotor?.swapped) direction = direction === "cw" ? "ccw" : "cw";
 
             // Real motor test: until the participant has answered, the drawing must not show which
             // way the motor should turn, so the bell only shivers.
             let target = poweredSpeed * 60;
             if (realSpin) {
                 target = revealed ? 9 : 0;
+            } else if (escMotor) {
+                target = escMotor.throttle * 40;
             }
             slot.spinSpeed = approach(slot.spinSpeed, target, target > slot.spinSpeed ? 2.5 : 1.6, dt);
             const sign = direction === "cw" ? -1 : 1; // positive rotation.y is counter-clockwise from above
@@ -1203,6 +1215,16 @@ export class KitStage {
             slot.motor.rotor.rotation.y = slot.spinAngle;
             const shiver = realSpin && !revealed ? Math.sin(this.time * 90) * 0.6 : 0;
             slot.motor.group.position.x = shiver;
+
+            // Phase wires light in turn: the ESC drives the three coils one after another, and the
+            // order (swapped wires reverse it) decides which way the bell follows.
+            const phaseSign = direction === "cw" ? -1 : 1;
+            slot.wires.forEach((wire, i) => {
+                const material = wire.material as THREE.MeshStandardMaterial;
+                const on = escMotor && escMotor.throttle > 0 && !this.reducedMotion;
+                const wave = on ? Math.max(0, Math.cos(slot.spinAngle * 3 * phaseSign - (i * 2 * Math.PI) / 3)) : 0;
+                material.emissiveIntensity = wave * 0.9;
+            });
 
             const fast = slot.spinSpeed > 25 || (this.reducedMotion && slot.spinSpeed > 0.1);
             const blurMaterial = slot.blur.material as THREE.MeshBasicMaterial;
@@ -1216,8 +1238,11 @@ export class KitStage {
             });
 
             const showArrows = (this.overlayOpacity.get("spinArrows") ?? 0) > 0.02;
-            const arrowDirection = shot.motion === "sandbox" ? direction : slot.direction;
-            const showThis = showArrows && (shot.motion === "sandbox" || revealed);
+            const arrowDirection = shot.motion === "sandbox" || escMotor ? direction : slot.direction;
+            // The ESC close-up shows only its own motor's direction, and only while it turns.
+            const showThis = escDemo
+                ? !!escMotor && escMotor.throttle > 0.02
+                : showArrows && (shot.motion === "sandbox" || revealed);
             slot.arrows.cw.visible = showThis && arrowDirection === "cw";
             slot.arrows.ccw.visible = showThis && arrowDirection === "ccw";
 
@@ -1254,7 +1279,7 @@ export class KitStage {
         const gimbal = o("gimbal");
         this.gimbal.group.visible = gimbal > 0.02;
         this.gimbal.group.scale.setScalar(0.6 + 0.4 * gimbal);
-        const activity = [Math.abs(this.roll), Math.abs(this.pitch), 0];
+        const activity = [Math.abs(this.roll + this.liveRoll), Math.abs(this.pitch + this.livePitch), 0];
         (this.gimbal.roll.material as THREE.MeshBasicMaterial).opacity =
             gimbal * (0.45 + Math.min(0.55, activity[0] * 3));
         (this.gimbal.pitch.material as THREE.MeshBasicMaterial).opacity =
@@ -1262,7 +1287,8 @@ export class KitStage {
         (this.gimbal.yaw.material as THREE.MeshBasicMaterial).opacity = gimbal * 0.7;
 
         const chip = o("chip");
-        (this.chip.material as THREE.MeshBasicMaterial).opacity = chip * (0.6 + Math.sin(this.time * 4) * 0.4);
+        // The chip lights up while the drone turns: a gyroscope measures turning, not tilt.
+        (this.chip.material as THREE.MeshBasicMaterial).opacity = chip * (0.35 + Math.min(0.65, this.turnRate * 0.6));
         (this.chip.material as THREE.MeshBasicMaterial).transparent = true;
 
         // Accelerometer: gravity always points straight down, whatever the drone does.
@@ -1287,11 +1313,6 @@ export class KitStage {
             (m.material as THREE.MeshBasicMaterial).transparent = true;
             m.visible = align > 0.02;
         }
-
-        const waves = o("waves");
-        this.waves.visible = waves > 0.02;
-        updateWaves(this.waves, this.time, 70);
-        this.waves.scale.setScalar(waves);
 
         for (const slot of this.slots) {
             for (const arrow of Object.values(slot.arrows)) {

@@ -45,7 +45,6 @@ import {
     useMspCliSession,
 } from "@/composables/useMspCliSession";
 import { DRONOBOX_KIT } from "@/dronobox/kit";
-import { decodeArmingFlags } from "@/dronobox/armingReasons";
 
 // Index = value of gyro_1_align in MSP_SENSOR_ALIGNMENT (API < 1.47), name = CLI value.
 const MSP_ALIGN_NAMES = ["DEFAULT", "CW0", "CW90", "CW180", "CW270", "CW0FLIP", "CW90FLIP", "CW180FLIP", "CW270FLIP"];
@@ -54,7 +53,6 @@ const ACC_NEEDS_CALIBRATION_BIT = 0;
 // The MCU is busy for about two seconds while it averages the accelerometer.
 const ACC_CALIBRATION_MS = 2500;
 const ATTITUDE_POLL_MS = 50;
-const RC_POLL_MS = 50;
 
 function wait(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -98,17 +96,6 @@ export function useDronoBoxFc(showWarning: (message: string) => void) {
         pitch: fcStore.sensorData.kinematics[1] ?? 0,
         heading: fcStore.sensorData.kinematics[2] ?? 0,
     }));
-    const batteryVolts = computed(() => fcStore.analogData.voltage ?? 0);
-    const batteryPresent = computed(() => batteryVolts.value >= DRONOBOX_KIT.batteryPresentVolts);
-    // MSP_RC reports channels after the receiver map: roll, pitch, yaw, throttle, then AUX.
-    const rcChannels = computed(() => fcStore.rc.channels.slice(0, Math.max(fcStore.rc.active_channels, 0)));
-    const armingReasons = computed(() =>
-        decodeArmingFlags(
-            fcStore.config.apiVersion,
-            fcStore.config.armingDisableCount,
-            fcStore.config.armingDisableFlags,
-        ),
-    );
 
     function startAttitudePolling(): void {
         addInterval(
@@ -121,14 +108,6 @@ export function useDronoBoxFc(showWarning: (message: string) => void) {
 
     function stopAttitudePolling(): void {
         removeInterval("dronobox_attitude");
-    }
-
-    function startRcPolling(): void {
-        addInterval("dronobox_rc", () => MSP.send_message(MSPCodes.MSP_RC, false, false), RC_POLL_MS, true);
-    }
-
-    function stopRcPolling(): void {
-        removeInterval("dronobox_rc");
     }
 
     // --- motor stop state (same rules as the Motors tab) ----------------------------------------
@@ -305,15 +284,9 @@ export function useDronoBoxFc(showWarning: (message: string) => void) {
         loaded,
         load,
         attitude,
-        batteryVolts,
-        batteryPresent,
-        rcChannels,
-        armingReasons,
         isArmed,
         startAttitudePolling,
         stopAttitudePolling,
-        startRcPolling,
-        stopRcPolling,
         alignment,
         alignmentIsKit,
         alignmentBusy,

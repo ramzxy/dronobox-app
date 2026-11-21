@@ -23,7 +23,7 @@ import { defineStore } from "pinia";
 import { computed, reactive, ref, watch } from "vue";
 import { DRONOBOX_KIT, type SpinDirection } from "@/dronobox/kit";
 
-export const DRONOBOX_STEPS = ["meet", "gyro", "align", "level", "motors", "safety", "spin", "radio", "done"] as const;
+export const DRONOBOX_STEPS = ["meet", "gyro", "align", "level", "motors", "safety", "spin", "done"] as const;
 export type DronoBoxStep = (typeof DRONOBOX_STEPS)[number];
 
 export interface MotorCheck {

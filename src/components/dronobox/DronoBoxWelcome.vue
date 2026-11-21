@@ -30,14 +30,14 @@
 
                 <ol class="dronobox-welcome__steps">
                     <li>
-                        <span class="dronobox-welcome__num">1</span>
+                        <span class="dronobox-welcome__num">01</span>
                         <div>
                             <strong>{{ $t("dronobox:welcomeStep1") }}</strong>
                             <span>{{ $t("dronobox:welcomeStep1Help") }}</span>
                         </div>
                     </li>
                     <li>
-                        <span class="dronobox-welcome__num">2</span>
+                        <span class="dronobox-welcome__num">02</span>
                         <div>
                             <strong>{{ $t("dronobox:welcomeStep2") }}</strong>
                             <span>{{ $t("dronobox:welcomeStep2Help") }}</span>
@@ -162,8 +162,8 @@ function setLanguage(code: string): void {
         display: flex;
         flex-direction: column;
         gap: 2rem;
-        padding: 2rem clamp(1.5rem, 3vw, 3rem);
-        background: var(--dronobox-panel);
+        padding: 1.5rem clamp(1.5rem, 3.5vw, 3.5rem) 2rem;
+        background: var(--dronobox-bg-0);
         border-right: 1px solid var(--dronobox-line);
     }
     &__top {
@@ -177,11 +177,14 @@ function setLanguage(code: string): void {
 
         strong {
             font-size: 1.2rem;
-            font-weight: 800;
+            font-weight: 660;
+            font-stretch: 112%;
             letter-spacing: -0.02em;
         }
         span {
-            font-size: 0.72rem;
+            margin-top: 0.15rem;
+            font-family: var(--dronobox-font-mono);
+            font-size: 0.7rem;
             color: var(--dronobox-ink-faint);
         }
     }
@@ -196,15 +199,12 @@ function setLanguage(code: string): void {
     }
     &__title {
         margin: 0;
-        font-size: clamp(2.5rem, 4vw, 3.75rem);
-        text-wrap: balance;
-        font-weight: 650;
-        line-height: 1.06;
-        letter-spacing: -0.035em;
+        font-size: clamp(2.75rem, 4.4vw, 4.25rem);
         color: var(--dronobox-ink);
     }
     &__lead {
         margin: 0;
+        max-width: 30em;
         font-size: 1.15rem;
         line-height: 1.5;
         color: var(--dronobox-ink-soft);
@@ -214,11 +214,9 @@ function setLanguage(code: string): void {
         align-items: center;
         gap: 0.6rem;
         margin: 0;
-        padding: 0.8rem 1rem;
-        border: 1px solid var(--dronobox-accent);
-        border-radius: 0.75rem;
-        background: var(--dronobox-panel);
-        font-weight: 600;
+        padding: 0.15rem 0 0.15rem 0.9rem;
+        border-left: 2px solid var(--dronobox-accent);
+        font-weight: 560;
 
         .iconify {
             flex: none;
@@ -229,15 +227,19 @@ function setLanguage(code: string): void {
     }
     &__steps {
         display: grid;
-        gap: 0.9rem;
         margin: 0.5rem 0 0;
         padding: 0;
         list-style: none;
 
         li {
             display: flex;
-            gap: 0.9rem;
-            align-items: flex-start;
+            gap: 1rem;
+            align-items: baseline;
+            padding: 0.9rem 0;
+            border-top: 1px solid var(--dronobox-line);
+        }
+        li:last-child {
+            border-bottom: 1px solid var(--dronobox-line);
         }
         div {
             display: grid;
@@ -254,14 +256,11 @@ function setLanguage(code: string): void {
     }
     &__num {
         flex: none;
-        display: grid;
-        place-items: center;
-        width: 1.9rem;
-        height: 1.9rem;
-        border: 1px solid var(--dronobox-line-strong);
-        border-radius: 999px;
+        width: 1.75rem;
+        font-family: var(--dronobox-font-mono);
+        font-size: 0.8rem;
+        font-variant-numeric: tabular-nums;
         color: var(--dronobox-accent);
-        font-weight: 800;
     }
     &__connect {
         display: grid;
@@ -281,13 +280,42 @@ function setLanguage(code: string): void {
             }
         }
 
-        .sidebar-connect__main {
-            height: 3rem;
-            font-size: 1rem;
-            font-weight: 700;
+        // Betaflight's split connect button, as the main site's primary pill with the device
+        // picker as a separate round button beside it.
+        .sidebar-connect__group {
+            gap: 0.5rem;
         }
-        .sidebar-connect__group > button:last-child {
+        .sidebar-connect__group > button {
             height: 3rem;
+            margin: 0;
+            border-radius: 999px;
+            transition:
+                background-color 0.25s var(--dronobox-ease-soft),
+                box-shadow 0.25s var(--dronobox-ease-soft),
+                transform 0.4s var(--dronobox-ease-out);
+        }
+        .sidebar-connect__main {
+            background: var(--dronobox-button);
+            color: var(--dronobox-on-accent);
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .sidebar-connect__group > button:last-child:not(.sidebar-connect__main) {
+            flex: none;
+            justify-content: center;
+            width: 3rem;
+            padding: 0;
+            background: transparent;
+            color: var(--dronobox-ink);
+            box-shadow: inset 0 0 0 1px var(--dronobox-line-strong);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .sidebar-connect__main:hover:not(:disabled) {
+                background: var(--dronobox-button-hover);
+            }
+            .sidebar-connect__group > button:last-child:not(.sidebar-connect__main):hover {
+                box-shadow: inset 0 0 0 1px var(--dronobox-ink);
+            }
         }
     }
     &__trouble {
@@ -340,6 +368,7 @@ function setLanguage(code: string): void {
     }
     &__stage {
         min-height: 26rem;
+        background: radial-gradient(ellipse 70% 60% at 50% 48%, var(--dronobox-bg-2), var(--dronobox-bg-0));
     }
 
     @media (max-width: 960px) {

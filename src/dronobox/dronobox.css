@@ -1,33 +1,87 @@
 /*
- * DronoBox fork: colour tokens for the workshop screens, and the immersive mode that hides the
- * Betaflight chrome (sidebar, status bar, account button) while the workshop lock is on.
+ * DronoBox fork: the workshop screens' look, and the immersive mode that hides the Betaflight
+ * chrome (sidebar, status bar, account button) while the workshop lock is on.
  *
- * The workshop screens are a dark navy stage in both light and dark mode: the 3D drone reads best
- * against it, and it matches the DroneTeam Twente blue.
+ * Tokens, type and buttons follow droneteamtwente.nl's "stage" world (see its DESIGN.md): a
+ * near-black ground, one signal blue that holds up on it, Mona Sans for words and Geist Mono for
+ * measurements. The workshop screens stay on the stage in light and dark mode alike: the 3D drone
+ * reads best against it.
  */
 
+@font-face {
+    font-family: "Mona Sans";
+    font-style: normal;
+    font-weight: 200 900;
+    font-stretch: 75% 125%;
+    font-display: swap;
+    src: url("/fonts/mona-sans-latin-wdth-normal.woff2") format("woff2-variations");
+    unicode-range:
+        U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+        U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: "Mona Sans";
+    font-style: normal;
+    font-weight: 200 900;
+    font-stretch: 75% 125%;
+    font-display: swap;
+    src: url("/fonts/mona-sans-latin-ext-wdth-normal.woff2") format("woff2-variations");
+    unicode-range:
+        U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
+        U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+    font-family: "Geist Mono";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("/fonts/geist-mono-latin-wght-normal.woff2") format("woff2-variations");
+    unicode-range:
+        U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+        U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: "Geist Mono";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("/fonts/geist-mono-latin-ext-wght-normal.woff2") format("woff2-variations");
+    unicode-range:
+        U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
+        U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 :root {
-    --dronobox-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --dronobox-font-sans: "Mona Sans", "Segoe UI", system-ui, sans-serif;
+    --dronobox-font-mono: "Geist Mono", ui-monospace, "Cascadia Mono", monospace;
+    --dronobox-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --dronobox-ease-soft: cubic-bezier(0.25, 1, 0.5, 1);
+
     --dronobox-brand: #0063ad;
-    --dronobox-bg-0: #0d141e;
-    --dronobox-bg-1: #172534;
-    --dronobox-bg-2: #25384b;
-    --dronobox-panel: #111c28;
-    --dronobox-panel-raised: #223343;
-    --dronobox-chip: rgba(17, 28, 40, 0.94);
-    --dronobox-line: rgba(150, 190, 255, 0.18);
-    --dronobox-line-strong: rgba(150, 190, 255, 0.34);
-    --dronobox-ink: #eef4ff;
-    --dronobox-ink-soft: rgba(226, 236, 255, 0.72);
-    --dronobox-ink-faint: rgba(226, 236, 255, 0.62);
-    --dronobox-accent: #4da3ff;
-    --dronobox-on-accent: #031430;
+    /* droneteamtwente.nl stage: #04070c ground, #0a0f17 one step up, dark-paper surfaces for panels */
+    --dronobox-bg-0: #04070c;
+    --dronobox-bg-1: #04070c;
+    --dronobox-bg-2: #0a0f17;
+    --dronobox-panel: #0e1218;
+    --dronobox-panel-raised: #171d26;
+    --dronobox-chip: rgba(10, 15, 23, 0.92);
+    --dronobox-line: #1c232d;
+    --dronobox-line-strong: #29323e;
+    --dronobox-ink: #edf2f7;
+    --dronobox-ink-soft: #bec7d1;
+    --dronobox-ink-faint: #8994a0;
+    --dronobox-accent: #5aaef5;
+    --dronobox-on-accent: #04070c;
+    --dronobox-button: #f4f7fa;
+    --dronobox-button-hover: #ffffff;
     --dronobox-ok: #46d68c;
     --dronobox-warn: #ffc94d;
     --dronobox-bad: #ff6b6b;
-    --dronobox-roll: #ff5a5f;
+    --dronobox-roll: #ff6b6f;
     --dronobox-pitch: #46d68c;
-    --dronobox-yaw: #4da3ff;
+    --dronobox-yaw: #5aaef5;
+    --dronobox-cw: #5aaef5;
+    --dronobox-ccw: #f29f67;
 }
 
 .dronobox-immersive .tab_container,
@@ -45,17 +99,82 @@
     padding-bottom: 0 !important;
 }
 
-/* The workshop screens sit on one flat navy; the 3D drone's own contact shadow grounds it. */
-.dronobox-backdrop {
-    background: var(--dronobox-bg-1);
-    color: var(--dronobox-ink);
-}
-
 .dronobox-backdrop {
     color-scheme: dark;
+    background: var(--dronobox-bg-1);
+    color: var(--dronobox-ink);
     accent-color: var(--dronobox-accent);
+    font-family: var(--dronobox-font-sans);
     font-size: 1rem;
+    -webkit-font-smoothing: antialiased;
 }
+
+/* Display type, as on the main site: wide, heavy, tracking that tightens as it grows. */
+.dronobox-backdrop h1 {
+    font-family: var(--dronobox-font-sans);
+    font-weight: 640;
+    font-stretch: 112%;
+    letter-spacing: calc(0.4px - 0.038em);
+    line-height: 0.98;
+    text-wrap: balance;
+}
+.dronobox-backdrop h2,
+.dronobox-backdrop strong {
+    font-stretch: 106%;
+}
+.dronobox-backdrop p {
+    text-wrap: pretty;
+}
+
+/* Measurements and readouts in mono, sentence case. */
+.dronobox-mono,
+.dronobox-backdrop :is(.dbx__where span, .dbx__hud dd, .dbx__axis strong, .dbx__count, code) {
+    font-family: var(--dronobox-font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+}
+
+/* Buttons as on the main site: pills; pressed goes down at once and comes back slowly. */
+.dronobox-backdrop button[data-slot="base"]:not([role="switch"], [role="checkbox"]) {
+    border-radius: 999px;
+    font-weight: 560;
+    letter-spacing: -0.005em;
+    transition:
+        background-color 0.25s var(--dronobox-ease-soft),
+        color 0.25s var(--dronobox-ease-soft),
+        box-shadow 0.25s var(--dronobox-ease-soft),
+        transform 0.4s var(--dronobox-ease-out);
+}
+.dronobox-backdrop button[data-slot="base"]:not([role="switch"], [role="checkbox"]):active:not(:disabled) {
+    transform: scale(0.97);
+    transition-duration: 0.25s, 0.25s, 0.25s, 0.08s;
+}
+.dronobox-backdrop button[data-slot="base"]:not([role="switch"], [role="checkbox"])[class*="bg-primary"] {
+    background: var(--dronobox-button);
+    color: var(--dronobox-on-accent);
+}
+.dronobox-backdrop button[data-slot="base"]:not([role="switch"], [role="checkbox"])[class*="ring-inset"] {
+    box-shadow: inset 0 0 0 1px var(--dronobox-line-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+    .dronobox-backdrop
+        button[data-slot="base"]:not([role="switch"], [role="checkbox"])[class*="bg-primary"]:hover:not(:disabled) {
+        background: var(--dronobox-button-hover);
+    }
+    .dronobox-backdrop
+        button[data-slot="base"]:not([role="switch"], [role="checkbox"])[class*="ring-inset"]:hover:not(:disabled) {
+        box-shadow: inset 0 0 0 1px var(--dronobox-ink);
+    }
+    .dronobox-backdrop button[data-slot="base"]:not([role="switch"], [role="checkbox"]) [data-slot="trailingIcon"] {
+        transition: transform 0.4s var(--dronobox-ease-out);
+    }
+    .dronobox-backdrop
+        button[data-slot="base"]:not([role="switch"], [role="checkbox"]):hover
+        [data-slot="trailingIcon"] {
+        transform: translateX(3px);
+    }
+}
+
 .dronobox-backdrop :is(button, a, input, summary):focus-visible {
     outline: 2px solid var(--dronobox-accent);
     outline-offset: 4px;
@@ -80,9 +199,6 @@
     }
 }
 
-.dronobox-backdrop {
-    font-family: "Segoe UI", system-ui, sans-serif;
-}
 .dronobox-backdrop input[type="range"] {
     accent-color: var(--axis, var(--dronobox-accent));
     background: transparent !important;

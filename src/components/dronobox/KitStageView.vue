@@ -19,7 +19,7 @@
                 type="button"
                 tabindex="-1"
                 class="kit-stage__label"
-                :class="{ 'is-active': highlight === part }"
+                :class="{ 'is-active': highlight === part, 'is-open': fact?.part === part }"
                 @pointerdown.stop
                 @click="emit('pick', part)"
                 @mouseenter="emit('hover', part)"
@@ -28,6 +28,23 @@
                 {{ $t(`dronobox:part${part.charAt(0).toUpperCase()}${part.slice(1)}`) }}
             </button>
         </div>
+        <Transition name="kit-stage-bubble">
+            <aside v-if="fact" :key="fact.part" ref="bubble" class="kit-stage__bubble" @pointerdown.stop>
+                <span class="kit-stage__bubble-dot" aria-hidden="true"></span>
+                <header>
+                    <strong>{{ fact.title }}</strong>
+                    <UButton
+                        size="xs"
+                        color="neutral"
+                        variant="ghost"
+                        icon="i-lucide-x"
+                        :aria-label="$t('close')"
+                        @click="emit('close')"
+                    />
+                </header>
+                <p>{{ fact.body }}</p>
+            </aside>
+        </Transition>
         <p v-if="state === 'loading'" class="kit-stage__status">{{ $t("dronobox:stageLoading") }}</p>
         <p v-else-if="state === 'failed'" class="kit-stage__status">{{ $t("dronobox:stageFailed") }}</p>
         <div v-if="state === 'ready'" class="kit-stage__toolbar" @pointerdown.stop @wheel.stop>
@@ -74,12 +91,20 @@ const props = withDefaults(
     defineProps<{
         input: Partial<StageInput>;
         highlight?: KitPart | null;
+        /** A part's explanation, shown in a bubble pinned to the part on the model. */
+        fact?: { part: KitPart; title: string; body: string } | null;
         draggable?: boolean;
     }>(),
-    { highlight: null, draggable: true },
+    { highlight: null, fact: null, draggable: true },
 );
 
-const emit = defineEmits<{ pick: [part: KitPart]; hover: [part: KitPart | null]; turn: [delta: number] }>();
+const emit = defineEmits<{
+    pick: [part: KitPart];
+    hover: [part: KitPart | null];
+    turn: [delta: number];
+    close: [];
+}>();
+const bubble = ref<HTMLElement | null>(null);
 
 const root = ref<HTMLElement | null>(null);
 const canvas = ref<HTMLCanvasElement | null>(null);
@@ -107,7 +132,44 @@ function setLabel(part: KitPart, el: HTMLElement | null): void {
     }
 }
 
+function placeBubble(anchor: LabelAnchor | undefined): void {
+    const el = bubble.value;
+    if (!el) {
+        return;
+    }
+    if (!anchor?.visible) {
+        el.classList.remove("is-visible");
+        return;
+    }
+    // Beside the part on whichever side has room; on a narrow stage, under or over it instead,
+    // so the bubble never hides the part it explains. Never under the toolbar.
+    const width = root.value?.clientWidth ?? 0;
+    const height = root.value?.clientHeight ?? 0;
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    const gap = 18;
+    let x: number;
+    let y: number;
+    if (anchor.x + gap + w <= width - 12) {
+        x = anchor.x + gap;
+        y = Math.max(72, Math.min(height - h - 16, anchor.y - 22));
+    } else if (anchor.x - gap - w >= 12) {
+        x = anchor.x - gap - w;
+        y = Math.max(72, Math.min(height - h - 16, anchor.y - 22));
+    } else {
+        x = Math.max(12, Math.min(width - w - 12, anchor.x - w / 2));
+        const below = anchor.y + gap + h <= height - 16;
+        y = below ? anchor.y + gap : Math.max(72, anchor.y - gap - h);
+    }
+    const transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+    if (el.style.transform !== transform) el.style.transform = transform;
+    el.style.setProperty("--dot-x", `${(anchor.x - x).toFixed(1)}px`);
+    el.style.setProperty("--dot-y", `${(anchor.y - y).toFixed(1)}px`);
+    el.classList.add("is-visible");
+}
+
 function placeLabels(anchors: LabelAnchor[]): void {
+    placeBubble(props.fact ? anchors.find((anchor) => anchor.part === props.fact?.part) : undefined);
     for (const anchor of anchors) {
         const el = labels.get(anchor.part);
         if (!el) {
@@ -263,19 +325,21 @@ onBeforeUnmount(() => {
         pointer-events: none;
     }
     &__hint {
-        color: var(--dronobox-ink-soft);
-        font-size: 0.75rem;
+        font-family: var(--dronobox-font-mono);
+        color: var(--dronobox-ink-faint);
+        font-size: 0.72rem;
     }
     &__tools {
         display: flex;
         pointer-events: auto;
         background: var(--dronobox-chip);
-        border: 1px solid var(--dronobox-line);
-        border-radius: 0.75rem;
-        padding: 0.25rem;
+        box-shadow: inset 0 0 0 1px var(--dronobox-line);
+        border-radius: 999px;
+        padding: 0.2rem;
         button {
             min-width: 2.5rem;
             min-height: 2.5rem;
+            justify-content: center;
         }
     }
     &__canvas {
@@ -301,14 +365,15 @@ onBeforeUnmount(() => {
         background: var(--dronobox-chip);
         color: var(--dronobox-ink);
         font-size: 0.78rem;
-        font-weight: 600;
+        font-weight: 560;
         white-space: nowrap;
         opacity: 0;
         pointer-events: none;
         transition:
-            opacity 0.3s ease,
-            background-color 0.2s ease,
-            border-color 0.2s ease;
+            opacity 0.4s var(--dronobox-ease-soft),
+            background-color 0.25s var(--dronobox-ease-soft),
+            border-color 0.25s var(--dronobox-ease-soft),
+            color 0.25s var(--dronobox-ease-soft);
 
         &.is-visible {
             opacity: 1;
@@ -316,10 +381,64 @@ onBeforeUnmount(() => {
             cursor: pointer;
         }
         &.is-active {
-            border-color: var(--dronobox-accent);
-            background: var(--dronobox-accent);
+            border-color: var(--dronobox-button);
+            background: var(--dronobox-button);
             color: var(--dronobox-on-accent);
         }
+        &.is-open.is-visible {
+            opacity: 0;
+            pointer-events: none;
+        }
+    }
+
+    &__bubble {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 3;
+        width: min(19rem, calc(100% - 2rem));
+        padding: 0.85rem 0.9rem 0.95rem 1rem;
+        border-radius: 1rem;
+        background: var(--dronobox-chip);
+        box-shadow: inset 0 0 0 1px var(--dronobox-line-strong);
+        backdrop-filter: blur(10px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s var(--dronobox-ease-soft);
+
+        &.is-visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin: -0.2rem -0.3rem 0.35rem 0;
+        }
+        strong {
+            font-size: 1.05rem;
+            font-weight: 620;
+            font-stretch: 106%;
+        }
+        p {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--dronobox-ink-soft);
+        }
+    }
+    &__bubble-dot {
+        position: absolute;
+        left: var(--dot-x, 0);
+        top: var(--dot-y, 0);
+        width: 0.6rem;
+        height: 0.6rem;
+        margin: -0.3rem 0 0 -0.3rem;
+        border-radius: 999px;
+        background: var(--dronobox-button);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--dronobox-button) 22%, transparent);
     }
 
     &__status {
@@ -337,5 +456,12 @@ onBeforeUnmount(() => {
             transition: none;
         }
     }
+}
+
+.kit-stage-bubble-enter-active {
+    transition: scale 0.45s var(--dronobox-ease-out);
+}
+.kit-stage-bubble-enter-from {
+    scale: 0.96;
 }
 </style>

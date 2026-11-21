@@ -21,31 +21,9 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
-import { decodeArmingFlags } from "../../src/dronobox/armingReasons";
 import { DRONOBOX_KIT, type SpinDirection } from "../../src/dronobox/kit";
 import { sandboxOutcome } from "../../src/dronobox/sandbox";
 import { useDronoBoxStore } from "../../src/stores/dronobox";
-
-describe("decodeArmingFlags", () => {
-    it("names the last bit ARM_SWITCH whatever the flag count", () => {
-        expect(decodeArmingFlags("1.46.0", 26, 1 << 25)).toEqual(["ARM_SWITCH"]);
-        expect(decodeArmingFlags("1.47.0", 29, 1 << 28)).toEqual(["ARM_SWITCH"]);
-    });
-
-    it("reports the laptop connection and lost radio by name", () => {
-        expect(decodeArmingFlags("1.46.0", 26, (1 << 2) | (1 << 16))).toEqual(["RXLOSS", "MSP"]);
-    });
-
-    it("renames the RPM filter flag from API 1.46", () => {
-        expect(decodeArmingFlags("1.45.0", 26, 1 << 20)).toEqual(["RPMFILTER"]);
-        expect(decodeArmingFlags("1.46.0", 26, 1 << 20)).toEqual(["DSHOT_TELEM"]);
-    });
-
-    it("returns nothing before the FC has reported its API version", () => {
-        expect(decodeArmingFlags(undefined, 26, 0xffff)).toEqual([]);
-        expect(decodeArmingFlags("", 26, 0xffff)).toEqual([]);
-    });
-});
 
 describe("useDronoBoxStore", () => {
     beforeEach(() => {
@@ -73,7 +51,7 @@ describe("useDronoBoxStore", () => {
                 store.completeAndAdvance(step);
             }
             expect(store.step).toBe("spin");
-            expect(store.canOpen("radio")).toBe(false);
+            expect(store.canOpen("done")).toBe(false);
         });
 
         it("lets an unlocked instructor jump to any step", () => {
@@ -81,9 +59,9 @@ describe("useDronoBoxStore", () => {
 
             expect(store.unlock("wrong")).toBe(false);
             expect(store.unlock(DRONOBOX_KIT.instructorPin)).toBe(true);
-            store.goTo("radio");
+            store.goTo("spin");
 
-            expect(store.step).toBe("radio");
+            expect(store.step).toBe("spin");
             expect(store.workshopLocked).toBe(false);
         });
     });

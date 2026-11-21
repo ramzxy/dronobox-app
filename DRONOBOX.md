@@ -7,17 +7,18 @@ Betaflight is GPL-3.0-or-later and so is this fork. The files listed below were 
 ## What participants see
 
 - A welcome page with the 3D DronoBox and its own Connect button (Betaflight's sidebar, status bar, sponsors and community links are hidden while the workshop lock is on).
-- After connecting, nine lessons, mirroring the DronoBox V2 manual ("Drone Bible") and the 2026 workshop deck:
-    1. **Parts**: the drone floats apart; pick a part to read what it is (facts from the kit's parts list).
-    2. **Gyroscope**: the lid lifts, the flight controller rises out of the body, the gyro chip lights up and three axis rings follow the real drone. Then **Match the tilt**: a see-through drone takes five poses and the participant tilts the real drone to copy each one, against the clock.
-    3. **Direction**: top view, an arrow sweeps 270° from the nose to where the board's arrow really points; one button sets CW 270° and saves.
-    4. **Level**: a gravity arrow through the drone; calibration only unlocks once the drone has been flat and still for two seconds.
-    5. **Motors**: the motors lift off their arms to show the ESCs and the three phase wires, then a sandbox: choose a direction per motor, take off, and watch it hover, spin or flip.
-    6. **Safety**: the 3D props come off when "props off" is ticked; the battery slides in when one is detected. The motor test stays locked until all three are true.
-    7. **Spin test**: hold to spin a real motor, say which way it turned; the direction is only revealed after answering.
-    8. **Radio**: the receiver lifts out sending waves; the 3D drone tilts, turns and climbs with the real sticks.
-    9. **Ready**: the drone hovers; pre-flight checklist and a plain-language list of what still blocks arming.
+- After connecting, eight lessons, mirroring the DronoBox V2 manual ("Drone Bible") and the 2026 workshop deck:
+    1. **Parts**: the drone floats apart; pick a part and the camera moves in while a bubble on the model says what it is (facts from the kit's parts list).
+    2. **Gyroscope**: the lid lifts, the flight controller rises out of the body and three axis rings follow the real drone. One tile per axis lights up while the drone turns about it; tapping a tile rocks the model about that axis. Then **Match the tilt**: a see-through drone takes five poses and the participant tilts the real drone to copy each one, against the clock.
+    3. **Direction**: an experiment in three steps. Tip the nose down and watch the model tip sideways; set CW 270° (one button, saves and reboots); tip the nose down again and watch it tip forward.
+    4. **Level**: a bubble level. Once the drone has been flat and still for two seconds, the accelerometer calibrates by itself.
+    5. **Motors**: the ESC close-up has a speed slider (the motor spins, the three phase wires light in turn) and a "swap two wires" button that crosses two wires and reverses the motor. Then a direction puzzle: all motors start clockwise, a tap flips one, a meter shows the twist on the frame, and take-off shows the result with a hint for what to change.
+    6. **Safety**: three ticks: props off (the 3D props come off), someone watching, battery plugged in (the 3D battery slides in). The battery goes into the power board, not the flight controller, so Betaflight cannot detect it and the participant ticks it.
+    7. **Spin test**: unlock the motor test, then the app walks through M1 to M4: hold to spin, say which way it turned, and a right answer moves on to the next motor. The direction is only revealed after answering.
+    8. **Ready**: pre-flight checklist.
+- From the gyroscope lesson on, the 3D drone follows the real one on every step.
 - The 3D view can be dragged in any direction and zoomed with the scroll wheel on every step.
+- There is no radio lesson: the workshop does not connect a transmitter.
 - English and Dutch.
 
 Progress lives in `sessionStorage`, so it survives the reboot after saving, but the next group on the same laptop starts fresh once the browser is closed. If the connection drops mid-flow, the welcome page says which step to carry on from.
@@ -36,9 +37,9 @@ Motors, propellers, ESCs, receiver and battery are not in the STEP; they are mod
 ## Interactive teaching and rendering
 
 - **Parts:** an assembly slider lets the learner pull the kit apart and put it back together. Choosing a part opens the assembly again.
-- **Gyroscope:** the axis explorer isolates roll, pitch or yaw. Dragging the drone or using the keyboard-accessible angle slider rotates only the model. A stationary frame and coloured axis show what changes. **Use my drone** restores live readings; the experiment never marks a hardware check complete or sends commands to the flight controller.
+- **Gyroscope:** a tapped axis tile shows that axis on the model. Dragging the model or the arrow keys on the tile turn it further; picking up the real drone goes back to live readings. The demo never marks a hardware check complete or sends commands to the flight controller.
 - Zoom buttons and reset-view work on touch screens. The model stays visible above the controls while scrolling lessons on narrow screens.
-- Static scenes stop rendering after transitions settle. Hidden/offscreen scenes stop immediately; input and visibility wake them. Rendering is capped at 60 fps and 1.6 million pixels. Reduced motion suppresses idle motion and inertial camera movement.
+- Static scenes stop rendering after transitions settle, and attitude jitter under 0.2° does not wake them. Hidden/offscreen scenes stop immediately; input and visibility wake them. Rendering is capped at 60 fps and 1.6 million pixels. Reduced motion suppresses idle motion and inertial camera movement.
 - CAD geometry is shared across reconnects. Scene-owned materials, textures and environment targets are released on unmount.
 - The mesh converter orients each closed solid consistently before packing it, preserving separate CAD face vertices for sharp edges. `python -m unittest discover -s tools/dronobox -p test_mesh_winding.py` checks the winding repair.
 
@@ -88,7 +89,7 @@ Changed upstream files (kept small to make rebasing easy):
 
 ## Not done yet
 
-- Not tried on a real DronoBox. The virtual flight controller reports a constant attitude, so the live gyro lessons, the ghost game and the stillness check were only exercised in code and with simulated values.
+- Not tried on a real DronoBox. The virtual flight controller reports a constant attitude, so the live gyro lessons, the ghost game, the nose-down check in the direction lesson and the stillness check were only exercised in code and with simulated values.
 - The attitude sign convention is copied from Betaflight's Setup tab; check on a real board that tilting the nose down tips the 3D nose down.
 - On firmware with MSP API 1.47+ (2025.12 and later) alignment goes through the CLI (`gyro_1_sensor_align`). On older firmware it goes through MSP. Check which firmware the kits run.
 - `baselineCli` is empty.
@@ -110,7 +111,7 @@ Then open http://localhost:8080 in Chrome or Edge.
 
 1. The code lives in the public fork [ramzxy/dronobox-app](https://github.com/ramzxy/dronobox-app) on the default branch `dronobox`. Vercel deploys production from `master`; release commits are pushed to both branches. `sourceUrl` in `src/dronobox/kit.ts` points there.
 2. Vercel project `dronobox-app`, framework preset "Other"; `vercel.json` sets the rest. Node 24.
-3. Domain `dronobox.droneteamtwente.nl`, added in Vercel.
-4. In Cloudflare DNS, a CNAME `dronobox` to the target Vercel shows (`vercel domains inspect dronobox.droneteamtwente.nl`), proxy **off** (grey cloud), so Vercel can issue the certificate.
+3. Domains `box.droneteamtwente.nl` (main) and `dronobox.droneteamtwente.nl`, added in Vercel.
+4. In Cloudflare DNS, a CNAME per subdomain to the target Vercel shows (`vercel domains verify box.droneteamtwente.nl`), proxy **off** (grey cloud), so Vercel can issue the certificate.
 
 Web Serial only works on HTTPS, which Vercel provides.

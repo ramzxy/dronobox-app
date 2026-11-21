@@ -1,5 +1,11 @@
 <template>
-    <svg class="dronobox-motor-map" viewBox="0 0 260 290" role="group" :aria-label="$t('dronobox:motorsMapLabel')">
+    <svg
+        class="dronobox-motor-map"
+        :class="{ 'is-edit': !!directions, 'is-disabled': disabled }"
+        viewBox="0 0 260 290"
+        role="group"
+        :aria-label="$t('dronobox:motorsMapLabel')"
+    >
         <defs>
             <marker
                 id="dronobox-arrowhead"
@@ -39,14 +45,24 @@
                 'is-spinning': motor.number === spinning,
                 'is-correct': checks[motor.number]?.correct === true,
                 'is-wrong': checks[motor.number]?.correct === false,
+                'is-cw': directions && motor.direction === 'cw',
+                'is-ccw': directions && motor.direction === 'ccw',
             }"
             role="button"
-            tabindex="0"
-            :aria-label="$t('dronobox:motorsPickMotor', { n: motor.number })"
-            :aria-pressed="motor.number === selected"
-            @click="emit('select', motor.number)"
-            @keydown.enter.prevent="emit('select', motor.number)"
-            @keydown.space.prevent="emit('select', motor.number)"
+            :tabindex="disabled ? -1 : 0"
+            :aria-disabled="disabled || undefined"
+            :aria-label="
+                directions
+                    ? $t('dronobox:motorsFlipMotor', {
+                          n: motor.number,
+                          direction: $t(motor.direction === 'cw' ? 'dronobox:motorsCw' : 'dronobox:motorsCcw'),
+                      })
+                    : $t('dronobox:motorsPickMotor', { n: motor.number })
+            "
+            :aria-pressed="directions ? undefined : motor.number === selected"
+            @click="choose(motor.number)"
+            @keydown.enter.prevent="choose(motor.number)"
+            @keydown.space.prevent="choose(motor.number)"
         >
             <circle :cx="motor.x" :cy="motor.y" :r="PROP_R" class="dronobox-motor-map__disc" />
             <g
@@ -82,7 +98,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { KitMotor } from "@/dronobox/kit";
+import type { KitMotor, SpinDirection } from "@/dronobox/kit";
 import type { MotorCheck } from "@/stores/dronobox";
 
 const props = defineProps<{
@@ -92,9 +108,16 @@ const props = defineProps<{
     spinning: number | null;
     /** Show every expected direction, not only the ones already answered. */
     revealAll?: boolean;
+    /** Edit mode: show these directions instead of the kit's; a tap asks to flip a motor. */
+    directions?: Record<number, SpinDirection> | null;
+    disabled?: boolean;
 }>();
 
 const emit = defineEmits<{ select: [number: number] }>();
+
+function choose(number: number): void {
+    if (!props.disabled) emit("select", number);
+}
 
 const CENTER = { x: 130, y: 150 };
 const OFFSET = 78;
@@ -107,7 +130,13 @@ const POSITIONS: Record<KitMotor["position"], { x: number; y: number }> = {
     backRight: { x: CENTER.x + OFFSET, y: CENTER.y + OFFSET },
 };
 
-const placed = computed(() => props.motors.map((motor) => ({ ...motor, ...POSITIONS[motor.position] })));
+const placed = computed(() =>
+    props.motors.map((motor) => ({
+        ...motor,
+        ...POSITIONS[motor.position],
+        direction: props.directions?.[motor.number] ?? motor.direction,
+    })),
+);
 
 const bodyPoints = computed(() =>
     Array.from({ length: 6 }, (_, i) => {
@@ -117,7 +146,7 @@ const bodyPoints = computed(() =>
 );
 
 function showDirection(number: number): boolean {
-    return props.revealAll || props.checks[number]?.answer != null;
+    return !!props.directions || props.revealAll || props.checks[number]?.answer != null;
 }
 
 // Until a motor has been answered the drawing must not give away which way it should turn,
@@ -230,12 +259,48 @@ function arcPath(motor: { x: number; y: number; direction: KitMotor["direction"]
         stroke-width: 3;
     }
     &__arrowhead {
-        fill: var(--ui-primary);
+        // Takes the colour of the arc it ends, so edit mode's two colours carry through.
+        fill: context-stroke;
     }
     &__label {
         font-size: 11px;
         font-weight: 600;
         fill: var(--ui-primary);
+    }
+
+    // Edit mode: one colour per direction, so matching pairs show at a glance.
+    &.is-edit &__motor {
+        --direction: var(--dronobox-cw);
+    }
+    &.is-edit &__motor.is-ccw {
+        --direction: var(--dronobox-ccw);
+    }
+    &.is-edit &__disc {
+        stroke: var(--direction);
+        stroke-dasharray: none;
+        fill: color-mix(in srgb, var(--direction) 10%, transparent);
+        transition:
+            stroke 0.25s ease,
+            fill 0.25s ease;
+    }
+    &.is-edit &__direction,
+    &.is-edit &__label {
+        stroke: var(--direction);
+        transition: stroke 0.25s ease;
+    }
+    &.is-edit &__label {
+        stroke: none;
+        fill: var(--direction);
+    }
+    &.is-edit &__motor:hover &__disc,
+    &.is-edit &__motor:focus-visible &__disc {
+        fill: color-mix(in srgb, var(--direction) 22%, transparent);
+    }
+    &.is-edit &__motor:focus-visible &__disc {
+        stroke-width: 3;
+    }
+    &.is-edit.is-disabled &__motor {
+        cursor: default;
     }
 
     @media (prefers-reduced-motion: reduce) {

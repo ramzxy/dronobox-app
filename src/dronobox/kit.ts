@@ -52,9 +52,6 @@ export const DRONOBOX_KIT = {
     /** Throttle sent while a participant holds a motor's spin button: about 10%, enough to see it turn. */
     motorTestOffset: 100,
 
-    /** Below this the battery is treated as unplugged (USB alone reads close to 0 V). */
-    batteryPresentVolts: 6,
-
     /**
      * Soft lock for the full Betaflight interface. It keeps curious hands out of PID tuning
      * during a workshop; it is not a security boundary. Change it per event if needed.
