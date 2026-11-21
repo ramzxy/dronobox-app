@@ -23,7 +23,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { DRONOBOX_KIT, type SpinDirection } from "../../src/dronobox/kit";
 import { sandboxOutcome } from "../../src/dronobox/sandbox";
-import { useDronoBoxStore } from "../../src/stores/dronobox";
+import { DRONOBOX_STEPS, useDronoBoxStore } from "../../src/stores/dronobox";
 
 describe("useDronoBoxStore", () => {
     beforeEach(() => {
@@ -47,7 +47,7 @@ describe("useDronoBoxStore", () => {
             store.goTo("spin");
             expect(store.step).toBe("meet");
 
-            for (const step of ["meet", "gyro", "align", "level", "motors", "safety"] as const) {
+            for (const step of ["meet", "level", "align", "gyro", "motors", "safety"] as const) {
                 store.completeAndAdvance(step);
             }
             expect(store.step).toBe("spin");
@@ -93,15 +93,37 @@ describe("useDronoBoxStore", () => {
 
     it("restores progress after the tab remounts, e.g. after a save and reboot", async () => {
         const store = useDronoBoxStore();
+        store.checkedParts = ["frame", "fc"];
         store.completeAndAdvance("meet");
-        store.completeAndAdvance("gyro");
+        store.completeAndAdvance("level");
+        store.relevel = true;
         await Promise.resolve();
 
         setActivePinia(createPinia());
         const restored = useDronoBoxStore();
 
         expect(restored.step).toBe("align");
-        expect(restored.isCompleted("gyro")).toBe(true);
+        expect(restored.isCompleted("level")).toBe(true);
+        expect(restored.checkedParts).toEqual(["frame", "fc"]);
+        expect(restored.relevel).toBe(true);
+    });
+
+    it("calibrates before any lesson that moves the drone, and sets the direction before the gyro lesson", () => {
+        const at = (step: (typeof DRONOBOX_STEPS)[number]) => DRONOBOX_STEPS.indexOf(step);
+        expect(at("level")).toBe(1);
+        expect(at("align")).toBeGreaterThan(at("level"));
+        expect(at("gyro")).toBeGreaterThan(at("align"));
+    });
+
+    it("forgets the checklist and a pending re-level on reset", () => {
+        const store = useDronoBoxStore();
+        store.checkedParts = ["frame"];
+        store.relevel = true;
+
+        store.resetProgress();
+
+        expect(store.checkedParts).toEqual([]);
+        expect(store.relevel).toBe(false);
     });
 });
 

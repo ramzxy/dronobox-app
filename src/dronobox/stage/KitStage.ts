@@ -24,6 +24,7 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { DRONOBOX_KIT, type SpinDirection } from "@/dronobox/kit";
 import type { KitGeometries } from "./kitMesh";
 import { sandboxOutcome } from "@/dronobox/sandbox";
+import { commutationStep } from "@/dronobox/esc";
 import {
     KIT_COLOURS,
     MOTOR_MOUNT,
@@ -88,8 +89,11 @@ export interface StageInput {
     highlight: KitPart | null;
     /** Parts lesson: the part the camera moves in on. */
     focus: KitPart | null;
-    /** ESC lesson: the speed signal sent to the close-up motor (0..1), and whether two of its wires are swapped. */
-    escDemo: { throttle: number; swapped: boolean } | null;
+    /**
+     * ESC lesson: the speed signal sent to the close-up motor (0..1), whether two of its wires are
+     * swapped, and how many switching steps the ESC has made so far (it only counts up).
+     */
+    escDemo: { throttle: number; swapped: boolean; step: number } | null;
     sandbox: { dirs: Record<number, SpinDirection>; flying: boolean } | null;
     /** Alignment demo: 0 shows where Betaflight assumes the arrow points, 1 where it really points. */
     alignTurn: number;
@@ -249,6 +253,11 @@ const DEG = Math.PI / 180;
 /** The motor in the ESC close-up: front right, nearest the camera. */
 export const ESC_DEMO_MOTOR = 2;
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
+
+/** The ESC demo has switched at least once, by throttle or one step at a time. */
+function escStarted(demo: { throttle: number; step: number }): boolean {
+    return demo.throttle > 0 || demo.step > 0;
+}
 
 /** Critically damped approach: frame-rate independent smoothing towards a target. */
 function approach(current: number, target: number, rate: number, dt: number): number {
@@ -423,6 +432,9 @@ export class KitStage {
     private batteryShown = 1;
     private alignShown = 1;
     private sandboxClock = 0;
+    /** ESC close-up: the switching step last seen, and where the bell is heading. */
+    private escStepSeen: number | null = null;
+    private escRotorTarget = 0;
     private sandboxFlying = false;
     private time = 0;
     private frameId = 0;
@@ -770,6 +782,7 @@ export class KitStage {
             // A new lesson starts from a level, untilted drone facing the camera's way.
             this.headingZero = null;
             this.sandboxClock = 0;
+            this.escStepSeen = null;
             this.orbitAzimuth = 0;
             this.orbitElevation = 0;
             this.orbitZoom = 1;
@@ -1206,24 +1219,37 @@ export class KitStage {
             let target = poweredSpeed * 60;
             if (realSpin) {
                 target = revealed ? 9 : 0;
-            } else if (escMotor) {
-                target = escMotor.throttle * 40;
             }
-            slot.spinSpeed = approach(slot.spinSpeed, target, target > slot.spinSpeed ? 2.5 : 1.6, dt);
             const sign = direction === "cw" ? -1 : 1; // positive rotation.y is counter-clockwise from above
-            if (!this.reducedMotion) slot.spinAngle += sign * slot.spinSpeed * dt;
+            if (escMotor) {
+                // The bell follows the ESC's switching one step (a sixth of a turn) at a time, slowed
+                // right down so the lesson can show which wire pulls when.
+                if (this.escStepSeen === null) {
+                    this.escRotorTarget = slot.spinAngle;
+                } else if (escMotor.step > this.escStepSeen) {
+                    this.escRotorTarget += sign * (escMotor.step - this.escStepSeen) * (Math.PI / 3);
+                }
+                this.escStepSeen = escMotor.step;
+                slot.spinSpeed = 0;
+                slot.spinAngle = this.reducedMotion
+                    ? this.escRotorTarget
+                    : approach(slot.spinAngle, this.escRotorTarget, 9, dt);
+            } else {
+                slot.spinSpeed = approach(slot.spinSpeed, target, target > slot.spinSpeed ? 2.5 : 1.6, dt);
+                if (!this.reducedMotion) slot.spinAngle += sign * slot.spinSpeed * dt;
+            }
             slot.motor.rotor.rotation.y = slot.spinAngle;
             const shiver = realSpin && !revealed ? Math.sin(this.time * 90) * 0.6 : 0;
             slot.motor.group.position.x = shiver;
 
-            // Phase wires light in turn: the ESC drives the three coils one after another, and the
-            // order (swapped wires reverse it) decides which way the bell follows.
-            const phaseSign = direction === "cw" ? -1 : 1;
+            // Phase wires light as the ESC switches them: bright on battery plus, dimmer on minus,
+            // dark while off. Swapping two wires changes which coil gets which, not what the ESC sends.
+            const levels = escMotor && escStarted(escMotor) ? commutationStep(escMotor.step) : null;
             slot.wires.forEach((wire, i) => {
                 const material = wire.material as THREE.MeshStandardMaterial;
-                const on = escMotor && escMotor.throttle > 0 && !this.reducedMotion;
-                const wave = on ? Math.max(0, Math.cos(slot.spinAngle * 3 * phaseSign - (i * 2 * Math.PI) / 3)) : 0;
-                material.emissiveIntensity = wave * 0.9;
+                const level = levels?.[i] ?? 0;
+                const glowTarget = level > 0 ? 1 : level < 0 ? 0.35 : 0;
+                material.emissiveIntensity = approach(material.emissiveIntensity, glowTarget, 18, dt);
             });
 
             const fast = slot.spinSpeed > 25 || (this.reducedMotion && slot.spinSpeed > 0.1);
@@ -1241,7 +1267,7 @@ export class KitStage {
             const arrowDirection = shot.motion === "sandbox" || escMotor ? direction : slot.direction;
             // The ESC close-up shows only its own motor's direction, and only while it turns.
             const showThis = escDemo
-                ? !!escMotor && escMotor.throttle > 0.02
+                ? !!escMotor && escStarted(escMotor)
                 : showArrows && (shot.motion === "sandbox" || revealed);
             slot.arrows.cw.visible = showThis && arrowDirection === "cw";
             slot.arrows.ccw.visible = showThis && arrowDirection === "ccw";

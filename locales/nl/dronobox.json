@@ -78,7 +78,7 @@
         "message": "De bordrichting kon niet worden opgeslagen. Vraag iemand van DroneTeam om hulp."
     },
     "alignWhy": {
-        "message": "Betaflight gaat ervan uit dat de pijl op de flight controller naar de neus wijst. Op de DronoBox wijst hij naar links, 270° met de klok mee vanaf de neus, en deze instelling draait dat terug. Opslaan herstart het bord; de app maakt daarna zelf weer verbinding."
+        "message": "Betaflight gaat ervan uit dat de pijl op de flight controller naar de neus wijst. Op de DronoBox wijst hij naar links, 270° met de klok mee vanaf de neus, en deze instelling draait dat terug. Het gekalibreerde waterpas is opgeslagen in de richtingen van het bord zelf, dus dat wordt daarna opnieuw gemeten. Opslaan herstart het bord; de app maakt daarna zelf weer verbinding."
     },
     "levelTitle": {
         "message": "Kalibreer de versnellingsmeter"
@@ -90,7 +90,7 @@
         "message": "Zet de drone op een vlakke tafel en laat los. Het kalibreren begint vanzelf."
     },
     "levelWhy": {
-        "message": "In angle mode keert de drone terug naar de horizontale stand als je de sticks loslaat. Daarvoor gebruikt hij de versnellingsmeter."
+        "message": "In angle mode zet de drone zichzelf recht als je de sticks loslaat, en daarvoor gebruikt hij de versnellingsmeter. Stil liggen helpt ook de gyroscoop: als het bord opstart, meet hij zijn eigen nulpunt, en tot dat gelukt is loopt het model achter je drone aan."
     },
     "safetyTitle": {
         "message": "Voordat de motoren draaien"
@@ -303,13 +303,13 @@
         "message": "Motortest"
     },
     "meetTitle": {
-        "message": "De onderdelen van je drone"
+        "message": "Controleer je drone"
     },
     "meetLead": {
-        "message": "Tik op een onderdeel in de lijst of op het model om te zien wat het doet."
+        "message": "Loop elk onderdeel na: lees wat het doet, controleer het op je eigen drone en vink het af."
     },
     "meetDone": {
-        "message": "Volgende: gyroscoop"
+        "message": "Volgende: kalibreren"
     },
     "partFrame": {
         "message": "Frame"
@@ -375,10 +375,10 @@
         "message": "De ESC"
     },
     "escLead": {
-        "message": "De ESC zet het snelheidssignaal van de flight controller om in stroom voor de drie draden van de motor."
+        "message": "De flight controller stuurt de ESC één getal: hoe snel. De ESC maakt daar stroom van door de drie draden van de motor in een vaste volgorde aan en uit te schakelen. Hier gaat dat flink vertraagd, zodat je het kunt volgen."
     },
     "escFact2": {
-        "message": "Door twee motordraden om te wisselen, keert de draairichting om. Koppel de accu los voordat je draden verwisselt."
+        "message": "Koppel op een echte drone eerst de accu los voordat je motordraden verwisselt."
     },
     "escNext": {
         "message": "Volgende: de richtingpuzzel"
@@ -537,22 +537,22 @@
         "message": "Opnieuw kalibreren"
     },
     "escSpeed": {
-        "message": "Snelheidssignaal"
+        "message": "Gas dat de flight controller vraagt"
     },
     "escSwap": {
         "message": "Wissel twee draden"
     },
     "escVerdict_idle": {
-        "message": "Schuif de snelheid omhoog en kijk naar de draden en de motor."
+        "message": "Schuif het gas omhoog of druk op Eén stap om te beginnen."
     },
     "escVerdict_cw": {
-        "message": "De draden zijn om de beurt aan en de motor volgt ze: met de klok mee."
+        "message": "De motor draait met de klok mee."
     },
     "escVerdict_ccw": {
-        "message": "De draden zijn om de beurt aan en de motor volgt ze: tegen de klok in."
+        "message": "De motor draait tegen de klok in."
     },
     "escVerdict_swapped": {
-        "message": "Twee draden gewisseld, dus de volgorde draait om en de motor ook."
+        "message": "Er zijn twee draden gewisseld, dus dat is andersom."
     },
     "sandboxHint_spin": {
         "message": "Elke propeller duwt het frame de andere kant op. Draai motoren om tot er twee elke kant op draaien."
@@ -586,5 +586,101 @@
     },
     "motorsUnlockFirst": {
         "message": "Zet eerst de motortest aan."
+    },
+    "meetListLabel": {
+        "message": "Te controleren onderdelen"
+    },
+    "meetProgress": {
+        "message": "{{done}} van {{total}} gecontroleerd"
+    },
+    "meetCheckLabel": {
+        "message": "Controleer op je drone"
+    },
+    "meetLooksRight": {
+        "message": "Klopt"
+    },
+    "meetChecked": {
+        "message": "Gecontroleerd"
+    },
+    "meetNotRight": {
+        "message": "Klopt het niet? Vraag een DroneTeam-lid voordat je verdergaat."
+    },
+    "partFrameCheck": {
+        "message": "Houd de body vast en wiebel voorzichtig aan elke arm. Niets wiebelt of kraakt en geen schroef zit los."
+    },
+    "partFcCheck": {
+        "message": "Hij ligt plat in het midden van het frame en blijft zitten als je er zacht tegen duwt. Geen losse draad raakt de pads."
+    },
+    "partPdbCheck": {
+        "message": "Rode draden zitten aan +, zwarte aan −. Elke soldeerverbinding is glanzend en glad en geen blote draad raakt een andere."
+    },
+    "partEscCheck": {
+        "message": "Elke ESC zit vast op zijn arm. De stroomdraden gaan naar het power board, de signaaldraad naar de flight controller."
+    },
+    "partMotorCheck": {
+        "message": "Elke motor zit stevig vast en draait met de hand soepel rond, zonder te schuren of te knarsen."
+    },
+    "partPropCheck": {
+        "message": "De propellers blijven er voorlopig af. Je zet ze er pas aan het eind op, passend bij de draairichting van elke motor."
+    },
+    "partReceiverCheck": {
+        "message": "Hij zit vast en de antenne blijft weg van de plek waar de propellers gaan draaien."
+    },
+    "partBatteryCheck": {
+        "message": "Houd hem los tot de veiligheidsstap. Het pakket is niet opgezwollen, gedeukt of gescheurd."
+    },
+    "alignTable": {
+        "message": "Zet de drone eerst plat op tafel. Opslaan herstart het bord, daarna kalibreert hij zichzelf opnieuw in de nieuwe richting."
+    },
+    "relevelTitle": {
+        "message": "Opnieuw kalibreren in de nieuwe richting"
+    },
+    "escOff": {
+        "message": "uit"
+    },
+    "escMotorLabel": {
+        "message": "Motor van bovenaf: draad {{plus}} op accu plus, draad {{minus}} op min."
+    },
+    "escNow": {
+        "message": "Stap {{n}} van 6: de stroom gaat erin via spoel {{plus}} en eruit via spoel {{minus}}. Spoel {{off}} rust."
+    },
+    "escStepOne": {
+        "message": "Eén stap"
+    },
+    "escHowTitle": {
+        "message": "Zo lees je het"
+    },
+    "escHow1Title": {
+        "message": "Drie draden, drie spoelen"
+    },
+    "escHow1Body": {
+        "message": "Elke ESC-draad loopt naar een eigen spoel in de motor. De kleuren komen overeen: A, B en C."
+    },
+    "escHow2Title": {
+        "message": "Plus, min, uit"
+    },
+    "escHow2Body": {
+        "message": "In elke stap schakelt de ESC één draad naar accu plus en één naar min, en laat de derde uit. De lijnen tonen elke draad in de tijd: omhoog is plus, omlaag is min, het midden is uit."
+    },
+    "escHow3Title": {
+        "message": "De magneet volgt de trekkracht"
+    },
+    "escHow3Body": {
+        "message": "De twee spoelen met stroom trekken aan de magneet in het midden. Elke stap schuift plus en min één plek op, dus de trekkracht gaat rond en de magneet volgt. Zes stappen zijn één rondje."
+    },
+    "escHow4Title": {
+        "message": "Gas bepaalt het tempo"
+    },
+    "escHow4Body": {
+        "message": "Meer gas laat de ESC sneller schakelen, dus de motor draait sneller. Een echte ESC schakelt duizenden keren per seconde."
+    },
+    "escHow5Title": {
+        "message": "Wissel twee draden om hem om te keren"
+    },
+    "escHow5Body": {
+        "message": "De ESC schakelt A, B, C altijd in dezelfde volgorde. Wissel twee draden van de motor om en die twee spoelen krijgen elkaars beurt, dus de trekkracht, en de motor, gaan de andere kant op."
+    },
+    "escNextHint": {
+        "message": "Probeer het gas en het wisselen van de draden om verder te gaan."
     }
 }

@@ -43,6 +43,20 @@
                     />
                 </header>
                 <p>{{ fact.body }}</p>
+                <div v-if="fact.check" class="kit-stage__check" :class="{ 'is-checked': fact.checked }">
+                    <span>{{ $t("dronobox:meetCheckLabel") }}</span>
+                    <p>{{ fact.check }}</p>
+                    <UButton
+                        size="md"
+                        :color="fact.checked ? 'neutral' : 'primary'"
+                        :variant="fact.checked ? 'outline' : 'solid'"
+                        :icon="fact.checked ? 'i-lucide-check' : undefined"
+                        :trailing-icon="fact.checked ? undefined : 'i-lucide-arrow-right'"
+                        :label="fact.checked ? $t('dronobox:meetChecked') : $t('dronobox:meetLooksRight')"
+                        @click="emit('confirm', fact.part)"
+                    />
+                    <small>{{ $t("dronobox:meetNotRight") }}</small>
+                </div>
             </aside>
         </Transition>
         <p v-if="state === 'loading'" class="kit-stage__status">{{ $t("dronobox:stageLoading") }}</p>
@@ -92,7 +106,7 @@ const props = withDefaults(
         input: Partial<StageInput>;
         highlight?: KitPart | null;
         /** A part's explanation, shown in a bubble pinned to the part on the model. */
-        fact?: { part: KitPart; title: string; body: string } | null;
+        fact?: { part: KitPart; title: string; body: string; check?: string; checked?: boolean } | null;
         draggable?: boolean;
     }>(),
     { highlight: null, fact: null, draggable: true },
@@ -103,6 +117,7 @@ const emit = defineEmits<{
     hover: [part: KitPart | null];
     turn: [delta: number];
     close: [];
+    confirm: [part: KitPart];
 }>();
 const bubble = ref<HTMLElement | null>(null);
 
@@ -396,7 +411,7 @@ onBeforeUnmount(() => {
         top: 0;
         left: 0;
         z-index: 3;
-        width: min(19rem, calc(100% - 2rem));
+        width: min(20rem, calc(100% - 2rem));
         padding: 0.85rem 0.9rem 0.95rem 1rem;
         border-radius: 1rem;
         background: var(--dronobox-chip);
@@ -427,6 +442,34 @@ onBeforeUnmount(() => {
             font-size: 0.9rem;
             line-height: 1.5;
             color: var(--dronobox-ink-soft);
+        }
+    }
+    &__check {
+        display: grid;
+        gap: 0.5rem;
+        margin-top: 0.85rem;
+        padding-top: 0.8rem;
+        border-top: 1px solid var(--dronobox-line);
+
+        > span {
+            font-family: var(--dronobox-font-mono);
+            font-size: 0.7rem;
+            color: var(--dronobox-accent);
+        }
+        p {
+            color: var(--dronobox-ink);
+        }
+        button {
+            justify-self: start;
+            margin-top: 0.2rem;
+        }
+        small {
+            font-size: 0.76rem;
+            line-height: 1.4;
+            color: var(--dronobox-ink-faint);
+        }
+        &.is-checked > span {
+            color: var(--dronobox-ok);
         }
     }
     &__bubble-dot {

@@ -78,7 +78,7 @@
         "message": "Couldn't save the board direction. Ask a DroneTeam member for help."
     },
     "alignWhy": {
-        "message": "Betaflight assumes the arrow printed on the flight controller points to the nose. On the DronoBox it points to the left, 270° clockwise from the nose, so this setting turns it back. Saving restarts the board; the app reconnects by itself."
+        "message": "Betaflight assumes the arrow printed on the flight controller points to the nose. On the DronoBox it points to the left, 270° clockwise from the nose, so this setting turns it back. The level you calibrated is stored in the board's own directions, so it is measured again afterwards. Saving restarts the board; the app reconnects by itself."
     },
     "levelTitle": {
         "message": "Calibrate the accelerometer"
@@ -90,7 +90,7 @@
         "message": "Put the drone on a flat table and let go. Calibration starts by itself."
     },
     "levelWhy": {
-        "message": "In angle mode, the drone returns to level when you release the sticks. It uses the accelerometer to find that level position."
+        "message": "In angle mode, the drone levels itself when you let go of the sticks, and it uses the accelerometer to find level. Lying still helps the gyroscope too: when the board starts, it measures its own zero, and until it has, the model trails behind your drone."
     },
     "safetyTitle": {
         "message": "Before the motors spin"
@@ -303,13 +303,13 @@
         "message": "Spin test"
     },
     "meetTitle": {
-        "message": "The parts of your drone"
+        "message": "Check your drone"
     },
     "meetLead": {
-        "message": "Tap a part in the list or on the model to see what it does."
+        "message": "Go through each part: read what it does, check it on your own drone, then tick it off."
     },
     "meetDone": {
-        "message": "Next: gyroscope"
+        "message": "Next: calibrate"
     },
     "partFrame": {
         "message": "Frame"
@@ -375,10 +375,10 @@
         "message": "The ESC"
     },
     "escLead": {
-        "message": "The ESC turns the flight controller's speed signal into power for the motor's three wires."
+        "message": "The flight controller sends the ESC one number: how fast. The ESC turns that into power by switching the motor's three wires on and off in a fixed order. Here it is slowed right down so you can follow it."
     },
     "escFact2": {
-        "message": "Swapping any two motor wires reverses the direction. Disconnect the battery before changing wires."
+        "message": "On a real drone, unplug the battery before you change motor wires."
     },
     "escNext": {
         "message": "Next: the direction puzzle"
@@ -537,22 +537,22 @@
         "message": "Calibrate again"
     },
     "escSpeed": {
-        "message": "Speed signal"
+        "message": "Throttle the flight controller asks for"
     },
     "escSwap": {
         "message": "Swap two wires"
     },
     "escVerdict_idle": {
-        "message": "Slide the speed up and watch the wires and the motor."
+        "message": "Move the throttle or press One step to start."
     },
     "escVerdict_cw": {
-        "message": "The wires take turns and the motor follows them: clockwise."
+        "message": "The motor turns clockwise."
     },
     "escVerdict_ccw": {
-        "message": "The wires take turns and the motor follows them: counter-clockwise."
+        "message": "The motor turns counter-clockwise."
     },
     "escVerdict_swapped": {
-        "message": "Two wires swapped, so the order flips and so does the motor."
+        "message": "Two wires are swapped, so that's the other way round."
     },
     "sandboxHint_spin": {
         "message": "Each propeller twists the frame the other way. Flip motors until two turn each way."
@@ -586,5 +586,101 @@
     },
     "motorsUnlockFirst": {
         "message": "Switch the motor test on first."
+    },
+    "meetListLabel": {
+        "message": "Parts to check"
+    },
+    "meetProgress": {
+        "message": "{{done}} of {{total}} checked"
+    },
+    "meetCheckLabel": {
+        "message": "Check on your drone"
+    },
+    "meetLooksRight": {
+        "message": "Looks right"
+    },
+    "meetChecked": {
+        "message": "Checked"
+    },
+    "meetNotRight": {
+        "message": "Not right? Ask a DroneTeam member before you go on."
+    },
+    "partFrameCheck": {
+        "message": "Hold the body and gently wiggle each arm. Nothing wobbles or creaks, and no screw is loose."
+    },
+    "partFcCheck": {
+        "message": "It sits flat in the middle of the frame and stays put when you push it gently. No loose wire touches its pads."
+    },
+    "partPdbCheck": {
+        "message": "Red wires go to +, black to −. Every solder joint is shiny and smooth, and no bare wire touches another."
+    },
+    "partEscCheck": {
+        "message": "Each ESC is fixed to its arm. Its power wires go to the power board, its signal wire to the flight controller."
+    },
+    "partMotorCheck": {
+        "message": "Each motor is screwed on tight and turns freely by hand, without scraping or grinding."
+    },
+    "partPropCheck": {
+        "message": "The propellers stay off for now. You fit them at the very end, matched to each motor's direction."
+    },
+    "partReceiverCheck": {
+        "message": "It is fixed in place, and its antenna stays clear of where the propellers will turn."
+    },
+    "partBatteryCheck": {
+        "message": "Keep it unplugged until the safety step. The pack is not swollen, dented or torn."
+    },
+    "alignTable": {
+        "message": "Put the drone flat on the table first. Saving restarts the board, then it levels itself again in its new direction."
+    },
+    "relevelTitle": {
+        "message": "Levelling again in the new direction"
+    },
+    "escOff": {
+        "message": "off"
+    },
+    "escMotorLabel": {
+        "message": "Motor seen from above: wire {{plus}} on battery plus, wire {{minus}} on minus."
+    },
+    "escNow": {
+        "message": "Step {{n}} of 6: current goes in through coil {{plus}} and out through coil {{minus}}. Coil {{off}} rests."
+    },
+    "escStepOne": {
+        "message": "One step"
+    },
+    "escHowTitle": {
+        "message": "How to read it"
+    },
+    "escHow1Title": {
+        "message": "Three wires, three coils"
+    },
+    "escHow1Body": {
+        "message": "Each ESC wire runs to its own coil in the motor. The colours match: A, B and C."
+    },
+    "escHow2Title": {
+        "message": "Plus, minus, off"
+    },
+    "escHow2Body": {
+        "message": "In every step the ESC switches one wire to battery plus and one to minus, and leaves the third off. The lines show each wire over time: up is plus, down is minus, the middle is off."
+    },
+    "escHow3Title": {
+        "message": "The magnet follows the pull"
+    },
+    "escHow3Body": {
+        "message": "The two coils with current pull on the magnet in the middle. Each step moves plus and minus on by one, so the pull goes round and the magnet follows. Six steps make one turn."
+    },
+    "escHow4Title": {
+        "message": "Throttle sets the pace"
+    },
+    "escHow4Body": {
+        "message": "More throttle makes the ESC switch faster, so the motor spins faster. A real ESC switches thousands of times a second."
+    },
+    "escHow5Title": {
+        "message": "Swap two wires to reverse it"
+    },
+    "escHow5Body": {
+        "message": "The ESC always switches A, B, C in the same order. Swap two of the motor's wires and those two coils get each other's turn, so the pull, and the motor, go round the other way."
+    },
+    "escNextHint": {
+        "message": "Try the throttle and the wire swap to go on."
     }
 }

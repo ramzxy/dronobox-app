@@ -82,6 +82,10 @@
     --dronobox-yaw: #5aaef5;
     --dronobox-cw: #5aaef5;
     --dronobox-ccw: #f29f67;
+    /* The ESC lesson's three motor wires, the same tints as on the 3D model. */
+    --dronobox-wire-a: #e0605c;
+    --dronobox-wire-b: #e3b341;
+    --dronobox-wire-c: #a9b2bc;
 }
 
 .dronobox-immersive .tab_container,
@@ -182,11 +186,6 @@
 .dronobox-backdrop ::selection {
     background: var(--dronobox-accent);
     color: var(--dronobox-on-accent);
-}
-@media (hover: hover) and (pointer: fine) {
-    .dbx-axis-explorer__choices button:hover {
-        background: var(--dronobox-panel-raised);
-    }
 }
 @media (prefers-reduced-motion: reduce) {
     .dronobox-backdrop *,

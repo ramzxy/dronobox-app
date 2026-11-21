@@ -23,7 +23,9 @@ import { defineStore } from "pinia";
 import { computed, reactive, ref, watch } from "vue";
 import { DRONOBOX_KIT, type SpinDirection } from "@/dronobox/kit";
 
-export const DRONOBOX_STEPS = ["meet", "gyro", "align", "level", "motors", "safety", "spin", "done"] as const;
+// Level comes first: lying still on the table also lets the gyroscope finish zeroing itself, and
+// until it has, the model trails behind the drone.
+export const DRONOBOX_STEPS = ["meet", "level", "align", "gyro", "motors", "safety", "spin", "done"] as const;
 export type DronoBoxStep = (typeof DRONOBOX_STEPS)[number];
 
 export interface MotorCheck {
@@ -35,6 +37,8 @@ interface SavedProgress {
     step: DronoBoxStep;
     completed: DronoBoxStep[];
     motors: Record<number, MotorCheck>;
+    checkedParts?: string[];
+    relevel?: boolean;
 }
 
 // sessionStorage, not localStorage: progress has to survive the reboot after "Save" (the app
@@ -72,6 +76,13 @@ export const useDronoBoxStore = defineStore("dronobox", () => {
     const step = ref<DronoBoxStep>(saved && DRONOBOX_STEPS.includes(saved.step) ? saved.step : "meet");
     const completed = ref<DronoBoxStep[]>((saved?.completed ?? []).filter((step) => DRONOBOX_STEPS.includes(step)));
     const motors = reactive<Record<number, MotorCheck>>({ ...emptyMotorChecks(), ...saved?.motors });
+    /** Parts the participant has checked on their own drone. */
+    const checkedParts = ref<string[]>(saved?.checkedParts ?? []);
+    /**
+     * The accelerometer was calibrated before the board's direction changed. Its zero is kept in
+     * the board's frame, so it has to be done again once the new direction is in.
+     */
+    const relevel = ref(saved?.relevel === true);
 
     /** True while participants are using the app: only the guided flow is shown. */
     const workshopLocked = computed(() => !instructorUnlocked.value);
@@ -126,6 +137,8 @@ export const useDronoBoxStore = defineStore("dronobox", () => {
     function resetProgress(): void {
         step.value = "meet";
         completed.value = [];
+        checkedParts.value = [];
+        relevel.value = false;
         Object.assign(motors, emptyMotorChecks());
     }
 
@@ -143,8 +156,15 @@ export const useDronoBoxStore = defineStore("dronobox", () => {
 
     watch(instructorUnlocked, (value) => writeSession(INSTRUCTOR_KEY, value));
     watch(
-        [step, completed, motors],
-        () => writeSession(PROGRESS_KEY, { step: step.value, completed: completed.value, motors: { ...motors } }),
+        [step, completed, motors, checkedParts, relevel],
+        () =>
+            writeSession(PROGRESS_KEY, {
+                step: step.value,
+                completed: completed.value,
+                motors: { ...motors },
+                checkedParts: checkedParts.value,
+                relevel: relevel.value,
+            }),
         { deep: true },
     );
 
@@ -156,6 +176,8 @@ export const useDronoBoxStore = defineStore("dronobox", () => {
         stepIndex,
         completed,
         motors,
+        checkedParts,
+        relevel,
         isCompleted,
         canOpen,
         goTo,

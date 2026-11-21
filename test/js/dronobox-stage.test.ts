@@ -21,7 +21,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as THREE from "three";
-import { KitStage } from "../../src/dronobox/stage/KitStage";
+import { ESC_DEMO_MOTOR, KitStage } from "../../src/dronobox/stage/KitStage";
 import type { KitGeometries } from "../../src/dronobox/stage/kitMesh";
 
 vi.mock("three", async (original) => {
@@ -118,6 +118,31 @@ describe("DronoBox scene lifecycle", () => {
         vi.advanceTimersByTime(1000);
         expect(vi.mocked(stage.renderer.render).mock.calls.length).toBeGreaterThan(frames);
         expect(tilt.rotation.z).toBeCloseTo((-20 * Math.PI) / 180, 2);
+    });
+
+    it("turns the ESC motor a sixth of a turn per switching step, and back with two wires swapped", () => {
+        type Slot = { number: number; spinAngle: number; wires: THREE.Mesh[] };
+        const slots = (stage as unknown as { slots: Slot[] }).slots;
+        const motor = slots.find((slot) => slot.number === ESC_DEMO_MOTOR) as Slot;
+        stage.update({ shot: "esc", escDemo: { throttle: 0.5, swapped: false, step: 0 } });
+        stage.start();
+        vi.advanceTimersByTime(1000);
+        const start = motor.spinAngle;
+
+        // M2 turns counter-clockwise seen from above, which is positive about the up axis.
+        stage.update({ escDemo: { throttle: 0.5, swapped: false, step: 3 } });
+        vi.advanceTimersByTime(2000);
+        expect(motor.spinAngle - start).toBeCloseTo(Math.PI, 2);
+
+        stage.update({ escDemo: { throttle: 0.5, swapped: true, step: 6 } });
+        vi.advanceTimersByTime(2000);
+        expect(motor.spinAngle - start).toBeCloseTo(0, 2);
+
+        // Step 6 is step 0 again: wire A on plus (brightest), B on minus, C off.
+        const glow = motor.wires.map((wire) => (wire.material as THREE.MeshStandardMaterial).emissiveIntensity);
+        expect(glow[0]).toBeGreaterThan(glow[1]);
+        expect(glow[1]).toBeGreaterThan(0.1);
+        expect(glow[2]).toBeLessThan(0.05);
     });
 
     it("does no rendering while hidden, even when new inputs arrive", () => {

@@ -372,7 +372,7 @@ export function createEsc(shrinkMaterial: THREE.Material): THREE.Group {
 }
 
 /** The three phase wires between an ESC and its motor. Real ones are black; tinted here so "swap any two" is visible. */
-export const PHASE_COLOURS = [0xc94a4a, 0xd9a92e, 0x3a3f47] as const;
+export const PHASE_COLOURS = [0xc94a4a, 0xd9a92e, 0x8a939d] as const;
 
 export function createWire(colour: number): THREE.Mesh {
     return new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 1, 8), surface(colour, 0.5));

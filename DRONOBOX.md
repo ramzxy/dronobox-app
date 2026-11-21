@@ -8,15 +8,16 @@ Betaflight is GPL-3.0-or-later and so is this fork. The files listed below were 
 
 - A welcome page with the 3D DronoBox and its own Connect button (Betaflight's sidebar, status bar, sponsors and community links are hidden while the workshop lock is on).
 - After connecting, eight lessons, mirroring the DronoBox V2 manual ("Drone Bible") and the 2026 workshop deck:
-    1. **Parts**: the drone floats apart; pick a part and the camera moves in while a bubble on the model says what it is (facts from the kit's parts list).
-    2. **Gyroscope**: the lid lifts, the flight controller rises out of the body and three axis rings follow the real drone. One tile per axis lights up while the drone turns about it; tapping a tile rocks the model about that axis. Then **Match the tilt**: a see-through drone takes five poses and the participant tilts the real drone to copy each one, against the clock.
-    3. **Direction**: an experiment in three steps. Tip the nose down and watch the model tip sideways; set CW 270° (one button, saves and reboots); tip the nose down again and watch it tip forward.
-    4. **Level**: a bubble level. Once the drone has been flat and still for two seconds, the accelerometer calibrates by itself.
-    5. **Motors**: the ESC close-up has a speed slider (the motor spins, the three phase wires light in turn) and a "swap two wires" button that crosses two wires and reverses the motor. Then a direction puzzle: all motors start clockwise, a tap flips one, a meter shows the twist on the frame, and take-off shows the result with a hint for what to change.
+    1. **Parts**: a checklist for the participant's own build. Each part opens a bubble on the 3D model with what it does and what to check (arms tight, solder joints clean, props still off, battery unplugged and undamaged); **Looks right** ticks it and moves on to the next part. The checks are short on purpose: the assembly manual covers the detail.
+    2. **Level**: a bubble level. Once the drone has been flat and still for two seconds, the accelerometer calibrates by itself. This comes first because lying still also lets the gyroscope finish zeroing itself after power-up; until it has, the model trails behind the real drone.
+    3. **Direction**: an experiment in three steps. Tip the nose down and watch the model tip sideways; set CW 270° (one button, saves and reboots, drone flat on the table); tip the nose down again and watch it tip forward. The accelerometer's zero is stored in the board's own frame, so after the direction changes the app calibrates once more, automatically, before step three.
+    4. **Gyroscope**: the lid lifts, the flight controller rises out of the body and three axis rings follow the real drone. One tile per axis lights up while the drone turns about it; tapping a tile rocks the model about that axis. Then **Match the tilt**: a see-through drone takes five poses and the participant tilts the real drone to copy each one, against the clock.
+    5. **Motors**: the ESC lesson, one page built around the motor drawing: the six-step switching on wires A, B and C next to a top view of the motor's coils and magnet, slowed right down, with a line under it saying what the current step does. The throttle sets the pace and **One step** stops the motor and goes on by hand; the 3D motor steps and its wires light in the same order. Four numbered points explain how to read the drawing, and **Swap two wires** crosses two wires and reverses the motor. Then a direction puzzle: all motors start clockwise, a tap flips one, a meter shows the twist on the frame, and take-off shows the result with a hint for what to change.
     6. **Safety**: three ticks: props off (the 3D props come off), someone watching, battery plugged in (the 3D battery slides in). The battery goes into the power board, not the flight controller, so Betaflight cannot detect it and the participant ticks it.
     7. **Spin test**: unlock the motor test, then the app walks through M1 to M4: hold to spin, say which way it turned, and a right answer moves on to the next motor. The direction is only revealed after answering.
     8. **Ready**: pre-flight checklist.
-- From the gyroscope lesson on, the 3D drone follows the real one on every step.
+- Every lesson shows its "How it works" explanation openly instead of folding it away.
+- After the parts checklist, the 3D drone follows the real one on every step.
 - The 3D view can be dragged in any direction and zoomed with the scroll wheel on every step.
 - There is no radio lesson: the workshop does not connect a transmitter.
 - English and Dutch.
@@ -36,7 +37,7 @@ Motors, propellers, ESCs, receiver and battery are not in the STEP; they are mod
 
 ## Interactive teaching and rendering
 
-- **Parts:** an assembly slider lets the learner pull the kit apart and put it back together. Choosing a part opens the assembly again.
+- **Parts:** an assembly slider lets the learner pull the kit apart and put it back together. Choosing a part opens the assembly again and moves the camera to it.
 - **Gyroscope:** a tapped axis tile shows that axis on the model. Dragging the model or the arrow keys on the tile turn it further; picking up the real drone goes back to live readings. The demo never marks a hardware check complete or sends commands to the flight controller.
 - Zoom buttons and reset-view work on touch screens. The model stays visible above the controls while scrolling lessons on narrow screens.
 - Static scenes stop rendering after transitions settle, and attitude jitter under 0.2° does not wake them. Hidden/offscreen scenes stop immediately; input and visibility wake them. Rendering is capped at 60 fps and 1.6 million pixels. Reduced motion suppresses idle motion and inertial camera movement.
@@ -67,12 +68,13 @@ On a laptop's first run (`src/dronobox/init.ts`):
 New:
 
 - `src/components/tabs/DronoBoxTab.vue`: the guided flow.
-- `src/components/dronobox/`: `KitStageView` (3D canvas and part labels), `MotorMap`, `StickCheck`, `ArmingStatus`, `InstructorDialog`, `DronoBoxWelcome`, `DronoBoxLogo`.
+- `src/components/dronobox/`: `KitStageView` (3D canvas, part labels, part bubble), `EscLesson` and `MotorPhases` (the ESC lesson), `MotorMap`, `InstructorDialog`, `DronoBoxWelcome`, `DronoBoxLogo`.
 - `src/dronobox/stage/`: `KitStage` (scene, camera shots, exploded views, overlays, sandbox flight), `kitParts` (bought parts and overlays), `kitMesh` (loader for the CAD mesh).
 - `src/composables/dronobox/useDronoBoxFc.ts`: all flight-controller traffic for the tab. It reuses upstream composables (`useMotorTesting`, `useMotorsData`, `useMspCliSession`, `useReboot`).
-- `src/stores/dronobox.ts`: progress, motor answers, instructor lock.
+- `src/stores/dronobox.ts`: progress, parts checklist, pending re-level, motor answers, instructor lock.
 - `src/dronobox/kit.ts`: kit facts (alignment, motor map, PIN, baseline, source URL).
-- `src/dronobox/sandbox.ts`, `armingReasons.ts`, `init.ts`, `dronobox.css`.
+- `src/dronobox/esc.ts`: six-step switching and coil layout for the ESC drawing.
+- `src/dronobox/sandbox.ts`, `init.ts`, `dronobox.css`.
 - `locales/{en,nl}/dronobox.json`: strings in their own i18next namespace, so Crowdin updates to `messages.json` never conflict.
 - `tools/dronobox/build_kit_mesh.py`, `src/public/dronobox/dronobox-v2.bin`.
 
@@ -92,6 +94,8 @@ Changed upstream files (kept small to make rebasing easy):
 - Not tried on a real DronoBox. The virtual flight controller reports a constant attitude, so the live gyro lessons, the ghost game, the nose-down check in the direction lesson and the stillness check were only exercised in code and with simulated values.
 - The attitude sign convention is copied from Betaflight's Setup tab; check on a real board that tilting the nose down tips the 3D nose down.
 - On firmware with MSP API 1.47+ (2025.12 and later) alignment goes through the CLI (`gyro_1_sensor_align`). On older firmware it goes through MSP. Check which firmware the kits run.
+- The re-level after setting the direction ran only against the virtual flight controller. On a real board, check that the second calibration finishes after the reboot and that angle mode holds level.
+- The parts checks are generic; align their wording with the assembly manual once it is final.
 - `baselineCli` is empty.
 - Remaining Betaflight branding: PWA icons (`src/images/pwa`), favicon, the sponsor tile on the firmware flasher (instructor-only).
 - Dutch strings need a read-through by a native speaker.
